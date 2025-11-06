@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-start g-4 mb-4">
+        <div class="col-lg-8">
+            <h1 class="page-heading d-flex align-items-center gap-2">
+                <i class="bi bi-speedometer2"></i>
+                Olá, {{ user.first_name|default:user.username }}!
+            </h1>
+            <p class="page-subtitle">
+                Aqui está um panorama rápido das suas emoções e gravações mais recentes.
+            </p>
+        </div>
+        <div class="col-lg-4">
+            <div class="card p-3">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Emoção mais recorrente</p>
+                    {% if dominant_emotion %}
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="emotion-badge emotion-{{ dominant_emotion|lower }}">
+                                <i class="bi bi-emoji-smile"></i> {{ dominant_emotion }}
+                            </span>
+                            <span class="badge bg-dark text-white">
+                                {{ dominant_emotion_count }} registros
+                            </span>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Comece gravando um áudio para descobrir.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Gravações totais</p>
+                            <h2 class="fw-bold mb-0">{{ total_recordings }}</h2>
+                        </div>
+                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                            <i class="bi bi-mic-fill"></i>
+                        </span>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">Mantenha uma rotina de registros para ampliar seus insights.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Emoções detectadas</p>
+                            <h2 class="fw-bold mb-0">{{ emotion_stats|length }}</h2>
+                        </div>
+                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                            <i class="bi bi-activity"></i>
+                        </span>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">Cada gravação ajuda a construir um mapa emocional completo.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Análises concluídas</p>
+                            <h2 class="fw-bold mb-0">{{ analysis_total }}</h2>
+                        </div>
+                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                            <i class="bi bi-bar-chart-line"></i>
+                        </span>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">Integre seu algoritmo para enriquecer ainda mais os resultados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold text-white mb-1">Distribuição de emoções</h5>
+                        <p class="mb-0" style="color: rgba(226, 232, 240, 0.72);">Visualize quais sentimentos aparecem com maior frequência.</p>
+                    </div>
+                    <span class="badge bg-light text-dark">{{ analysis_total }} análises</span>
+                </div>
+                {% if emotion_stats %}
+                    <canvas id="emotionChart"></canvas>
+                {% else %}
+                    <div class="text-center py-5" style="color: rgba(226, 232, 240, 0.75);">
+                        <i class="bi bi-inbox" style="font-size: 48px;"></i>
+                        <p class="mt-3 mb-0">Nada por aqui ainda. Registre um áudio para liberar este gráfico.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-lightning-charge"></i> Ações rápidas
+                </h5>
+                <p class="text-muted mb-4">Comece um novo registro ou explore seu histórico com um clique.</p>
+                <div class="d-grid gap-3">
+                    <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-mic"></i> Nova gravação
+                    </a>
+                    <a href="{% url 'history' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-clock-history"></i> Abrir histórico
+                    </a>
+                </div>
+                <div class="stats-bubble mt-4">
+                    <div class="stat-item">
+                        <span class="label">Últimas análises</span>
+                        <span class="value">{{ recent_analyses|length }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Emoções únicas</span>
+                        <span class="value">{{ emotion_stats|length }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Total de registros</span>
+                        <span class="value">{{ total_recordings }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-lg-7">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-clock-history"></i> Linhas do tempo recentes
+                </h5>
+                {% if recent_analyses %}
+                    <div class="timeline-wrapper">
+                        {% for analysis in recent_analyses %}
+                            <div class="timeline-item">
+                                <div>
+                                    <h6 class="mb-1">{{ analysis.recording.title }}</h6>
+                                    <p class="mb-0 text-muted small">
+                                        Analisado em {{ analysis.analyzed_at|date:'d/m/Y H:i' }}
+                                    </p>
+                                </div>
+                                <span class="emotion-badge emotion-{{ analysis.dominant_emotion }}">
+                                    {{ analysis.get_emotion_display_name }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-emoji-neutral" style="font-size: 48px;"></i>
+                        <p class="mt-3 mb-0">Suas linhas do tempo aparecerão aqui após as primeiras análises.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-mic"></i> Gravações recentes
+                </h5>
+                {% if recordings %}
+                    <div class="list-group list-group-flush">
+                        {% for recording in recordings %}
+                            <a href="{% url 'analyze_audio' recording.id %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-semibold">{{ recording.title }}</span>
+                                    <small class="text-muted">{{ recording.created_at|date:'d/m/Y H:i' }}</small>
+                                </div>
+                                {% if recording.description %}
+                                    <p class="mb-1 text-muted small">{{ recording.description|truncatewords:12 }}</p>
+                                {% endif %}
+                                {% if recording.emotion_analysis %}
+                                    <span class="emotion-badge emotion-{{ recording.emotion_analysis.dominant_emotion }}">
+                                        {{ recording.emotion_analysis.get_emotion_display_name }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Aguardando análise</span>
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'history' %}" class="btn btn-outline-primary btn-sm">
+                            Ver todo o histórico
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-mic-mute" style="font-size: 48px;"></i>
+                        <p class="mt-3 mb-0">Nenhuma gravação encontrada. Que tal começar uma agora?</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    {% if emotion_stats %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script>
+            const emotionLabels = JSON.parse('{{ emotion_labels_json|escapejs }}');
+            const emotionValues = JSON.parse('{{ emotion_values_json|escapejs }}');
+            const ctx = document.getElementById('emotionChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: emotionLabels,
+                        datasets: [{
+                            data: emotionValues,
+                            backgroundColor: [
+                                '#fde047', '#60a5fa', '#f87171', '#818cf8', '#f472b6', '#34d399', '#94a3b8'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 12
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#e2e8f0'
+                                }
+                            }
+                        },
+                        cutout: '62%',
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        </script>
+    {% endif %}
+{% endblock %}

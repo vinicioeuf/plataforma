@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}Início - EmotionAI{% endblock %}
+
+{% block content %}
+<section class="container hero-section">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <div class="hero-badge">
+                <i class="bi bi-stars"></i>
+                Sua jornada de autocuidado começa aqui
+            </div>
+            <h1 class="hero-title mt-4">
+                Transforme suas emoções em autoconhecimento com tecnologia de voz
+            </h1>
+            <p class="hero-paragraph">
+                A EmotionAI combina inteligência artificial e bem-estar emocional para reconhecer sentimentos a 
+                partir da sua voz, criando um panorama claro do seu estado emocional a cada gravação.
+            </p>
+            <div class="hero-cta">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-speedometer2"></i> Acessar painel
+                    </a>
+                    <a href="{% url 'record_audio' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-mic"></i> Nova análise
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-plus"></i> Criar conta gratuita
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Já tenho conta
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="stats-bubble mt-5">
+                <div class="stat-item">
+                    <span class="label">Emoções mapeadas</span>
+                    <span class="value">7</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Gravações por usuário</span>
+                    <span class="value">Ilimitadas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Tempo médio de análise</span>
+                    <span class="value">~5s</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card p-4 p-lg-5">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2">Como funciona</h3>
+                    <p class="text-muted mb-4">
+                        O ciclo completo da análise de emoções, da captura da voz ao insight final.
+                    </p>
+                    <div class="workflow-step">
+                        <div class="workflow-index">1</div>
+                        <div class="workflow-content">
+                            <h5>Grave ou envie seu áudio</h5>
+                            <p class="text-muted mb-0">Compatível com formatos populares e gravação direto do navegador.</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="workflow-index">2</div>
+                        <div class="workflow-content">
+                            <h5>Analise instantaneamente</h5>
+                            <p class="text-muted mb-0">Integre seu modelo de IA e obtenha emoções dominantes e secundárias.</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step mb-0">
+                        <div class="workflow-index">3</div>
+                        <div class="workflow-content">
+                            <h5>Acompanhe sua evolução</h5>
+                            <p class="text-muted mb-0">Visualize padrões emocionais e histórico completo em poucos cliques.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container secondary-section">
+    <div class="section-heading">
+        <h2 class="fw-bold">Tudo que você precisa para entender suas emoções</h2>
+        <p>Funcionalidades construídas para apoiar o usuário do primeiro contato ao acompanhamento constante.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-xl-4">
+            <div class="feature-card h-100">
+                <div class="feature-icon"><i class="bi bi-mic"></i></div>
+                <h4 class="fw-semibold">Gravação fluida</h4>
+                <p class="text-muted">Grave diretamente do navegador com feedback em tempo real e pré-visualização instantânea.</p>
+                <ul class="list-unstyled text-muted small mb-0">
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Suporte a áudio multiformato</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Upload arrastar-e-soltar</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <div class="feature-card h-100">
+                <div class="feature-icon"><i class="bi bi-bar-chart"></i></div>
+                <h4 class="fw-semibold">Insights acionáveis</h4>
+                <p class="text-muted">Visualize gráficos dinâmicos, emoções dominantes e distribuição detalhada em segundos.</p>
+                <ul class="list-unstyled text-muted small mb-0">
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Dados prontos para dashboards</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Histórico sempre acessível</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <div class="feature-card h-100">
+                <div class="feature-icon"><i class="bi bi-lock"></i></div>
+                <h4 class="fw-semibold">Segurança em primeiro lugar</h4>
+                <p class="text-muted">Permissões por usuário, armazenamento isolado e proteção CSRF nativos do Django.</p>
+                <ul class="list-unstyled text-muted small mb-0">
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Gerenciamento de contas seguro</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Arquivos sob seu controle</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container secondary-section">
+    <div class="section-heading">
+        <h2 class="fw-bold">Emoções que você acompanha com precisão</h2>
+        <p>Identificamos emoções primárias e secundárias para um panorama completo do seu estado emocional.</p>
+    </div>
+
+    <div class="history-grid">
+        <div class="card text-white" style="background: rgba(15, 23, 42, 0.85);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-laughing" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Alegria</h4>
+                <p class="text-muted mb-0">Bem-estar, entusiasmo e energia positiva na sua voz.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(30, 64, 175, 0.85);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-frown" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Tristeza</h4>
+                <p class="text-muted mb-0">Sinais de reflexão e momentos de baixa energia emocional.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(220, 38, 38, 0.85);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-angry" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Raiva</h4>
+                <p class="text-muted mb-0">Identifique gatilhos e momentos de tensão com clareza.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(79, 70, 229, 0.88);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-dizzy" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Medo</h4>
+                <p class="text-muted mb-0">Detecte nuances de insegurança e ansiedade na sua fala.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(236, 72, 153, 0.88);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-surprise" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Surpresa</h4>
+                <p class="text-muted mb-0">Capte reações espontâneas e momentos inesperados.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(6, 95, 70, 0.88);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-grimace" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Nojo</h4>
+                <p class="text-muted mb-0">Observe repulsas sutis e desconfortos na entonação.</p>
+            </div>
+        </div>
+        <div class="card text-white" style="background: rgba(100, 116, 139, 0.85);">
+            <div class="card-body text-center">
+                <i class="bi bi-emoji-neutral" style="font-size: 54px;"></i>
+                <h4 class="mt-3">Neutro</h4>
+                <p class="text-muted mb-0">Momentos de estabilidade e equilíbrio emocional.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container secondary-section pb-5">
+    <div class="card p-4 p-lg-5">
+        <div class="card-body text-center">
+            <h2 class="fw-bold mb-3">Pronto para desbloquear seus insights emocionais?</h2>
+            <p class="text-muted mb-4">Crie sua conta ou faça login para começar a registrar momentos importantes e acompanhar sua evolução emocional.</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-mic"></i> Registrar nova emoção
+                </a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">
+                    <i class="bi bi-person-plus"></i> Criar minha conta
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Já uso a plataforma
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

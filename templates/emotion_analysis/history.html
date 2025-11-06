@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h1 class="page-heading">
+                <i class="bi bi-clock-history"></i>
+                Histórico de gravações
+            </h1>
+            <p class="page-subtitle">Revise suas capturas, acompanhe emoções e mantenha sua linha do tempo em dia.</p>
+        </div>
+    </div>
+    
+    {% if recordings %}
+        <div class="history-grid">
+            {% for recording in recordings %}
+                <div class="card history-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-semibold mb-1">{{ recording.title }}</h5>
+                                <small class="text-muted">Registrado em {{ recording.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'analyze_audio' recording.id %}">
+                                            <i class="bi bi-eye"></i> Visualizar detalhes
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{% url 'delete_recording' recording.id %}">
+                                            <i class="bi bi-trash"></i> Excluir registro
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {% if recording.description %}
+                            <p class="text-muted small">{{ recording.description|truncatewords:20 }}</p>
+                        {% endif %}
+
+                        <div class="audio-shell mb-3">
+                            <audio controls class="w-100">
+                                <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
+                                Seu navegador não suporta áudio.
+                            </audio>
+                        </div>
+
+                        <div>
+                            {% if recording.emotion_analysis %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="emotion-badge emotion-{{ recording.emotion_analysis.dominant_emotion }}">
+                                        {{ recording.emotion_analysis.get_emotion_display_name }}
+                                    </span>
+                                    <small class="text-muted fw-semibold">
+                                        {{ recording.emotion_analysis.get_confidence_percentage }}%
+                                    </small>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-secondary">Aguardando análise</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'analyze_audio' recording.id %}" class="btn btn-outline-primary btn-sm">
+                                {% if recording.emotion_analysis %}
+                                    Revisar análise
+                                {% else %}
+                                    Analisar agora
+                                {% endif %}
+                            </a>
+                            <a href="{% url 'delete_recording' recording.id %}" class="text-danger small">
+                                <i class="bi bi-trash"></i> Excluir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Nova gravação
+            </a>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 80px;"></i>
+                <h3 class="mt-4 mb-3">Nenhuma gravação ainda</h3>
+                <p class="text-muted mb-4">Comece registrando sua voz para desbloquear análises personalizadas.</p>
+                <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-mic"></i> Fazer primeira gravação
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

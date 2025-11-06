@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Análise - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center text-lg-start">
+            <h1 class="page-heading">
+                <i class="bi bi-graph-up-arrow"></i>
+                Resultado da análise
+            </h1>
+            <p class="page-subtitle">Reveja o áudio selecionado e acompanhe a distribuição das emoções detectadas.</p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="fw-bold mb-4">
+                        <i class="bi bi-graph-up-arrow text-primary"></i> Análise de Emoção
+                    </h2>
+                    
+                    <!-- Informações da Gravação -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">{{ recording.title }}</h5>
+                            {% if recording.description %}
+                                <p class="text-muted mb-2">{{ recording.description }}</p>
+                            {% endif %}
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> {{ recording.created_at|date:"d/m/Y H:i" }}
+                            </small>
+                            
+                            <div class="mt-3">
+                                <audio controls class="w-100">
+                                    <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
+                                    Seu navegador não suporta o elemento de áudio.
+                                </audio>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if analysis %}
+                        <!-- Resultado da Análise -->
+                        <div class="alert alert-success">
+                            <h4 class="alert-heading">
+                                <i class="bi bi-check-circle"></i> Análise Concluída!
+                            </h4>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-3">Emoção Dominante</h6>
+                                        <div class="mb-3">
+                                            <span class="emotion-badge emotion-{{ analysis.dominant_emotion }}" 
+                                                  style="font-size: 24px; padding: 15px 30px;">
+                                                {{ analysis.get_emotion_display_name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-3">Confiança</h6>
+                                        <h2 class="fw-bold text-primary mb-0">
+                                            {{ analysis.get_confidence_percentage }}%
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Todas as Emoções Detectadas -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-bar-chart"></i> Distribuição das Emoções
+                                </h5>
+                                <div class="list-group">
+                                    {% for emotion, value in analysis.emotions_data.items %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="fw-bold">{{ emotion|title }}</span>
+                                                <span class="text-muted">{{ value|floatformat:2 }}%</span>
+                                            </div>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: {{ value }}%;" 
+                                                     aria-valuenow="{{ value }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    {{ value|floatformat:1 }}%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if action_plan %}
+                            <div class="card mb-4 action-plan-card">
+                                <div class="card-body">
+                                    <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
+                                        <div>
+                                            <span class="badge plan-badge mb-2">Plano de ação personalizado</span>
+                                            <h4 class="fw-bold mb-2">{{ action_plan.title }}</h4>
+                                            <p class="text-muted mb-0">{{ action_plan.summary }}</p>
+                                        </div>
+                                        {% if action_plan.affirmation %}
+                                            <div class="action-affirmation">
+                                                <i class="bi bi-chat-quote"></i>
+                                                <p class="mb-0">{{ action_plan.affirmation }}</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row g-4 mt-4">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-semibold mb-3">
+                                                <i class="bi bi-rocket-takeoff"></i> Micro ações sugeridas
+                                            </h6>
+                                            <ul class="plan-list">
+                                                {% for item in action_plan.micro_actions %}
+                                                    <li>
+                                                        <i class="bi bi-check2-circle"></i>
+                                                        <span>{{ item }}</span>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="fw-semibold mb-3">
+                                                <i class="bi bi-bookmark-heart"></i> Recursos de apoio
+                                            </h6>
+                                            <div class="plan-resource-grid">
+                                                {% for resource in action_plan.resources %}
+                                                    <div class="plan-resource">
+                                                        <h6 class="fw-semibold mb-1">{{ resource.label }}</h6>
+                                                        <p class="text-muted mb-0 small">{{ resource.description }}</p>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if analysis.notes %}
+                            <div class="alert alert-info">
+                                <h6 class="fw-bold">Observações:</h6>
+                                <p class="mb-0">{{ analysis.notes }}</p>
+                            </div>
+                        {% endif %}
+                        
+                    {% else %}
+                        <!-- Botão para Iniciar Análise -->
+                        <div class="text-center mb-4">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                Este áudio ainda não foi analisado
+                            </div>
+                            
+                            <button id="analyzeButton" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle"></i> Iniciar Análise
+                            </button>
+                            
+                            <div id="analysisProgress" class="d-none mt-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Analisando...</span>
+                                </div>
+                                <p class="mt-2">Analisando seu áudio, aguarde...</p>
+                            </div>
+                            
+                            <div id="analysisError" class="d-none alert alert-danger mt-4">
+                                Erro ao processar a análise. Tente novamente.
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Ações -->
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> Voltar ao Dashboard
+                        </a>
+                        <a href="{% url 'history' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-clock-history"></i> Ver Histórico
+                        </a>
+                        <a href="{% url 'record_audio' %}" class="btn btn-primary">
+                            <i class="bi bi-mic"></i> Nova Gravação
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not analysis %}
+<script>
+    const analyzeButton = document.getElementById('analyzeButton');
+    const analysisProgress = document.getElementById('analysisProgress');
+    const analysisError = document.getElementById('analysisError');
+    
+    analyzeButton.addEventListener('click', async () => {
+        analyzeButton.classList.add('d-none');
+        analysisProgress.classList.remove('d-none');
+        analysisError.classList.add('d-none');
+        
+        try {
+            const response = await fetch('{% url "process_emotion_analysis" recording.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                // Recarregar a página para mostrar os resultados
+                location.reload();
+            } else {
+                throw new Error('Erro na análise');
+            }
+        } catch (error) {
+            console.error(error);
+            analysisProgress.classList.add('d-none');
+            analysisError.classList.remove('d-none');
+            analyzeButton.classList.remove('d-none');
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

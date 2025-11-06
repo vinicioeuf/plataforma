@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Gravar Áudio - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center text-lg-start">
+            <h1 class="page-heading">
+                <i class="bi bi-mic"></i>
+                Nova captura de áudio
+            </h1>
+            <p class="page-subtitle">Grave diretamente no navegador ou envie um arquivo existente para análise.</p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="fw-bold mb-4 text-center">
+                        <i class="bi bi-mic-fill text-primary"></i> Nova Gravação
+                    </h2>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="record-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#record" type="button" role="tab">
+                                <i class="bi bi-mic"></i> Gravar Áudio
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#upload" type="button" role="tab">
+                                <i class="bi bi-upload"></i> Enviar Arquivo
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Aba de Gravação -->
+                        <div class="tab-pane fade show active" id="record" role="tabpanel">
+                            <div class="text-center mb-4">
+                                <div id="recordingStatus" class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Clique no botão abaixo para começar a gravar
+                                </div>
+                                
+                                <button id="recordButton" class="btn btn-primary btn-lg mb-3">
+                                    <i class="bi bi-mic"></i> Iniciar Gravação
+                                </button>
+                                
+                                <div id="audioPreview" class="d-none mb-3">
+                                    <audio id="audioPlayer" controls class="w-100 mb-3"></audio>
+                                    <button id="restartButton" class="btn btn-warning">
+                                        <i class="bi bi-arrow-clockwise"></i> Gravar Novamente
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <form id="recordForm" class="d-none" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="file" id="recordedAudio" name="audio_file" class="d-none">
+                                
+                                <div class="mb-3">
+                                    <label for="recordTitle" class="form-label">Título da Gravação</label>
+                                    <input type="text" class="form-control" id="recordTitle" name="title" 
+                                           placeholder="Ex: Diário de hoje" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="recordDescription" class="form-label">Descrição (opcional)</label>
+                                    <textarea class="form-control" id="recordDescription" name="description" 
+                                              rows="3" placeholder="Adicione uma descrição..."></textarea>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-check-circle"></i> Salvar e Analisar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Aba de Upload -->
+                        <div class="tab-pane fade" id="upload" role="tabpanel">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                                        {{ form.title.label }}
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger small">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.audio_file.id_for_label }}" class="form-label">
+                                        {{ form.audio_file.label }}
+                                    </label>
+                                    {{ form.audio_file }}
+                                    <div class="form-text">
+                                        Formatos aceitos: MP3, WAV, OGG, WebM, M4A
+                                    </div>
+                                    {% if form.audio_file.errors %}
+                                        <div class="text-danger small">{{ form.audio_file.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-upload"></i> Enviar e Analisar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let recordedBlob;
+    
+    const recordButton = document.getElementById('recordButton');
+    const audioPreview = document.getElementById('audioPreview');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const recordForm = document.getElementById('recordForm');
+    const restartButton = document.getElementById('restartButton');
+    const recordingStatus = document.getElementById('recordingStatus');
+    const recordedAudioInput = document.getElementById('recordedAudio');
+    
+    recordButton.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+            // Iniciar gravação
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(recordedBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPreview.classList.remove('d-none');
+                    recordForm.classList.remove('d-none');
+                    
+                    // Converter blob para file
+                    const file = new File([recordedBlob], 'recording.webm', { type: 'audio/webm' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    recordedAudioInput.files = dataTransfer.files;
+                };
+                
+                mediaRecorder.start();
+                audioChunks = [];
+                recordButton.innerHTML = '<i class="bi bi-stop-circle"></i> Parar Gravação';
+                recordButton.classList.remove('btn-primary');
+                recordButton.classList.add('btn-danger');
+                recordingStatus.innerHTML = '<i class="bi bi-record-circle text-danger"></i> Gravando...';
+                recordingStatus.classList.remove('alert-info');
+                recordingStatus.classList.add('alert-danger');
+            } catch (error) {
+                alert('Erro ao acessar o microfone. Verifique as permissões.');
+                console.error(error);
+            }
+        } else {
+            // Parar gravação
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            recordButton.innerHTML = '<i class="bi bi-mic"></i> Iniciar Gravação';
+            recordButton.classList.remove('btn-danger');
+            recordButton.classList.add('btn-primary');
+            recordingStatus.innerHTML = '<i class="bi bi-check-circle text-success"></i> Gravação concluída!';
+            recordingStatus.classList.remove('alert-danger');
+            recordingStatus.classList.add('alert-success');
+            recordButton.style.display = 'none';
+        }
+    });
+    
+    restartButton.addEventListener('click', () => {
+        audioPreview.classList.add('d-none');
+        recordForm.classList.add('d-none');
+        recordButton.style.display = 'inline-block';
+        recordingStatus.innerHTML = '<i class="bi bi-info-circle"></i> Clique no botão abaixo para começar a gravar';
+        recordingStatus.classList.remove('alert-success');
+        recordingStatus.classList.add('alert-info');
+        audioChunks = [];
+    });
+</script>
+{% endblock %}
