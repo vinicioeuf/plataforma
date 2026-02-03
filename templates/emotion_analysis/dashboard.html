@@ -1,73 +1,119 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - EmotionAI{% endblock %}
+{% block title %}Dashboard - {{ profile.get_user_type_display }} - EmotionAI{% endblock %}
 
 {% block content %}
 <div class="container pb-5">
+    <!-- Cabeçalho personalizado por tipo de usuário -->
     <div class="row align-items-start g-4 mb-4">
         <div class="col-lg-8">
             <h1 class="page-heading d-flex align-items-center gap-2">
-                <i class="bi bi-speedometer2"></i>
-                Olá, {{ user.first_name|default:user.username }}!
+                {% if profile.user_type == 'professional' %}
+                    <i class="bi bi-person-badge"></i>
+                    Bem-vindo, Dr(a). {{ user.first_name|default:user.username }}!
+                {% else %}
+                    <i class="bi bi-speedometer2"></i>
+                    Olá, {{ user.first_name|default:user.username }}!
+                {% endif %}
             </h1>
             <p class="page-subtitle">
-                Aqui está um panorama rápido das suas emoções e gravações mais recentes.
+                {% if profile.user_type == 'professional' %}
+                    Painel do profissional - Gerencie suas consultas e pacientes.
+                {% else %}
+                    Aqui está um panorama das suas emoções, consultas e atividades.
+                {% endif %}
             </p>
         </div>
         <div class="col-lg-4">
-            <div class="card p-3">
-                <div class="card-body">
-                    <p class="text-muted mb-1">Emoção mais recorrente</p>
-                    {% if dominant_emotion %}
-                        <div class="d-flex align-items-center justify-content-between">
-                            <span class="emotion-badge emotion-{{ dominant_emotion|lower }}">
-                                <i class="bi bi-emoji-smile"></i> {{ dominant_emotion }}
-                            </span>
-                            <span class="badge bg-dark text-white">
-                                {{ dominant_emotion_count }} registros
-                            </span>
-                        </div>
-                    {% else %}
-                        <p class="text-muted mb-0">Comece gravando um áudio para descobrir.</p>
-                    {% endif %}
+            {% if profile.user_type == 'patient' %}
+                <div class="card p-3">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Estado emocional aparente</p>
+                        {% if dominant_emotion %}
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="emotion-badge emotion-{{ dominant_emotion|lower }}">
+                                    <i class="bi bi-heart"></i> {{ dominant_emotion }}
+                                </span>
+                                <span class="badge bg-dark text-white">
+                                    {{ dominant_emotion_count }} registros
+                                </span>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">Comece gravando um áudio para descobrir.</p>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+            {% else %}
+                <div class="card p-3">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Próxima consulta</p>
+                        {% if consultations_today > 0 %}
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge bg-primary">{{ consultations_today }} hoje</span>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">Nenhuma consulta agendada para hoje.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 
+    <!-- Cartões de estatísticas -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">Gravações totais</p>
-                            <h2 class="fw-bold mb-0">{{ total_recordings }}</h2>
+        {% if profile.user_type == 'professional' %}
+            <!-- Estatísticas para profissionais -->
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Consultas hoje</p>
+                                <h2 class="fw-bold mb-0">{{ consultations_today }}</h2>
+                            </div>
+                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                                <i class="bi bi-calendar-check"></i>
+                            </span>
                         </div>
-                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                            <i class="bi bi-mic-fill"></i>
-                        </span>
                     </div>
-                    <p class="small text-muted mt-3 mb-0">Mantenha uma rotina de registros para ampliar seus insights.</p>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">Emoções detectadas</p>
-                            <h2 class="fw-bold mb-0">{{ emotion_stats|length }}</h2>
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Total de pacientes</p>
+                                <h2 class="fw-bold mb-0">{{ total_patients }}</h2>
+                            </div>
+                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                                <i class="bi bi-people"></i>
+                            </span>
                         </div>
-                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                            <i class="bi bi-activity"></i>
-                        </span>
                     </div>
-                    <p class="small text-muted mt-3 mb-0">Cada gravação ajuda a construir um mapa emocional completo.</p>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <!-- Estatísticas para pacientes -->
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Gravações totais</p>
+                                <h2 class="fw-bold mb-0">{{ total_recordings }}</h2>
+                            </div>
+                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                                <i class="bi bi-mic-fill"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Cartões comuns -->
         <div class="col-md-4">
             <div class="card p-4 h-100">
                 <div class="card-body">
@@ -80,71 +126,276 @@
                             <i class="bi bi-bar-chart-line"></i>
                         </span>
                     </div>
-                    <p class="small text-muted mt-3 mb-0">Integre seu algoritmo para enriquecer ainda mais os resultados.</p>
+                    <p class="small text-muted mt-3 mb-0">Integre análises para enriquecer os resultados.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">{% if profile.user_type == 'professional' %}Última consulta{% else %}Jogos jogados{% endif %}</p>
+                            <h2 class="fw-bold mb-0">{% if profile.user_type == 'professional' %}{{ recent_consultations|length }}{% else %}{{ recent_games|length }}{% endif %}</h2>
+                        </div>
+                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                            {% if profile.user_type == 'professional' %}
+                                <i class="bi bi-calendar2-heart"></i>
+                            {% else %}
+                                <i class="bi bi-controller"></i>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">
+                        {% if profile.user_type == 'professional' %}
+                            Acompanhe sua agenda de consultas.
+                        {% else %}
+                            Relaxe com nossos jogos terapêuticos.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-7">
-            <div class="chart-card h-100">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h5 class="fw-bold text-white mb-1">Distribuição de emoções</h5>
-                        <p class="mb-0" style="color: rgba(226, 232, 240, 0.72);">Visualize quais sentimentos aparecem com maior frequência.</p>
-                    </div>
-                    <span class="badge bg-light text-dark">{{ analysis_total }} análises</span>
+    <!-- Seção de Ações Rápidas -->
+    <section class="quick-actions-section mt-4">
+        <div class="card p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-lightning-charge"></i> Ações rápidas
+                    </h5>
+                    <p class="text-muted mb-0">Escolha a próxima etapa e nós te levamos até lá.</p>
                 </div>
-                {% if emotion_stats %}
-                    <canvas id="emotionChart"></canvas>
+                <span class="badge bg-dark-subtle text-dark-emphasis">
+                    <i class="bi bi-mouse2"></i> 100% clicável
+                </span>
+            </div>
+            <div class="quick-actions-grid mt-4">
+                {% if profile.user_type == 'professional' %}
+                    <button type="button" class="quick-action-card primary" data-url="{% url 'consultations' %}">
+                        <span class="quick-action-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Gerenciar agenda</strong>
+                            <small>Confirme consultas e acompanhe pacientes.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'history' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-people"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Pacientes ativos</strong>
+                            <small>Revise registros e histórico emocional.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'record_audio' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-mic"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Nova gravação</strong>
+                            <small>Capture sinais de voz do paciente.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'profile_setup' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-gear"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Configurações</strong>
+                            <small>Atualize especialidades e horários.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
                 {% else %}
-                    <div class="text-center py-5" style="color: rgba(226, 232, 240, 0.75);">
-                        <i class="bi bi-inbox" style="font-size: 48px;"></i>
-                        <p class="mt-3 mb-0">Nada por aqui ainda. Registre um áudio para liberar este gráfico.</p>
-                    </div>
+                    <button type="button" class="quick-action-card primary" data-url="{% url 'record_audio' %}">
+                        <span class="quick-action-icon">
+                            <i class="bi bi-mic"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Nova gravação</strong>
+                            <small>Registre sua voz e acompanhe emoções.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'games_menu' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-controller"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Relaxar e jogar</strong>
+                            <small>Três experiências rápidas para acalmar.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'consultations' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-chat-heart"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Consultas</strong>
+                            <small>Agende ou acompanhe seu cuidado.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                    <button type="button" class="quick-action-card" data-url="{% url 'history' %}">
+                        <span class="quick-action-icon alt">
+                            <i class="bi bi-clock-history"></i>
+                        </span>
+                        <div class="quick-action-content">
+                            <strong>Histórico completo</strong>
+                            <small>Reviva suas análises e registros.</small>
+                        </div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
                 {% endif %}
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-lightning-charge"></i> Ações rápidas
-                </h5>
-                <p class="text-muted mb-4">Comece um novo registro ou explore seu histórico com um clique.</p>
-                <div class="d-grid gap-3">
-                    <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-mic"></i> Nova gravação
-                    </a>
-                    <a href="{% url 'history' %}" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-clock-history"></i> Abrir histórico
-                    </a>
+    </section>
+
+    <!-- Seção específica por tipo de usuário -->
+    <div class="row g-4 mt-4">
+        {% if profile.user_type == 'professional' %}
+            <!-- Dashboard do Profissional -->
+            <div class="col-lg-8">
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-calendar2-week"></i> Consultas Recentes
+                    </h5>
+                    {% if recent_consultations %}
+                        <div class="timeline-wrapper">
+                            {% for consultation in recent_consultations %}
+                                <div class="timeline-item">
+                                    <div>
+                                        <h6 class="mb-1">{{ consultation.title }}</h6>
+                                        <p class="mb-0 text-muted small">
+                                            Paciente: {{ consultation.patient.get_full_name|default:consultation.patient.username }}<br>
+                                            {{ consultation.scheduled_datetime|date:'d/m/Y H:i' }} - {{ consultation.get_status_display }}
+                                        </p>
+                                    </div>
+                                    <a href="{% url 'consultation_detail' consultation.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x" style="font-size: 48px;"></i>
+                            <p class="mt-3 mb-0">Nenhuma consulta agendada ainda.</p>
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="stats-bubble mt-4">
-                    <div class="stat-item">
-                        <span class="label">Últimas análises</span>
-                        <span class="value">{{ recent_analyses|length }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">Emoções únicas</span>
-                        <span class="value">{{ emotion_stats|length }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">Total de registros</span>
-                        <span class="value">{{ total_recordings }}</span>
+            </div>
+            <div class="col-lg-4" id="journal-space">
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-graph-up"></i> Estatísticas
+                    </h5>
+                    <div class="d-grid gap-2">
+                        <div class="stat-card">
+                            <span class="stat-number">{{ consultations_today }}</span>
+                            <span class="stat-label">Consultas hoje</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">{{ total_patients }}</span>
+                            <span class="stat-label">Total de pacientes</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <!-- Dashboard do Paciente -->
+            <div class="col-lg-8">
+                {% if emotion_stats %}
+                    <div class="chart-card h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold text-white mb-1">Distribuição de emoções</h5>
+                                <p class="mb-0" style="color: rgba(226, 232, 240, 0.72);">Visualize quais sentimentos aparecem com maior frequência.</p>
+                            </div>
+                            <span class="badge bg-light text-dark">{{ analysis_total }} análises</span>
+                        </div>
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="card p-4 h-100">
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 48px;"></i>
+                            <p class="mt-3 mb-0">Nada por aqui ainda. Registre um áudio para liberar este gráfico.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-4">
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-journal-heart"></i> Confessionário Virtual
+                    </h5>
+                    <p class="text-muted small mb-3">Um espaço seguro para você desabafar e registrar seus sentimentos do dia.</p>
+                    
+                    <form id="daily-journal" class="mb-3">
+                        {% csrf_token %}
+                        <textarea 
+                            class="form-control" 
+                            rows="4" 
+                            placeholder="Como você está se sentindo hoje? Conte aqui seus pensamentos, medos, alegrias... Este é seu espaço privado."
+                            id="journal-content"
+                            style="border: none; background: rgba(0,0,0,0.05); resize: none;"
+                        ></textarea>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted">📝 Suas palavras ficam só com você</small>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="saveJournalEntry(this)">
+                                <i class="bi bi-heart"></i> Salvar
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if next_consultation %}
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Próxima consulta</h6>
+                            <p class="mb-0">{{ next_consultation.scheduled_datetime|date:'d/m/Y H:i' }}</p>
+                            <small>Dr(a). {{ next_consultation.professional.get_full_name|default:next_consultation.professional.username }}</small>
+                        </div>
+                    {% endif %}
+                    
+                    {% if recent_games %}
+                        <h6 class="mt-3">Atividades recentes</h6>
+                        {% for game in recent_games %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small">{{ game.game_name }}</span>
+                                <span class="badge bg-success">{{ game.score }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-controller text-muted" style="font-size: 24px;"></i>
+                            <p class="small text-muted mt-2">Experimente nossos jogos relaxantes!</p>
+                        </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'games_menu' %}" class="btn btn-success w-100 mt-3">
+                        <i class="bi bi-play-circle"></i> Jogar agora
+                    </a>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
-    <div class="row g-4 mt-4">
-        <div class="col-lg-7">
-            <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-clock-history"></i> Linhas do tempo recentes
-                </h5>
-                {% if recent_analyses %}
+    <!-- Linha do tempo para pacientes -->
+    {% if profile.user_type == 'patient' and recent_analyses %}
+        <div class="row g-4 mt-4">
+            <div class="col-lg-12">
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-clock-history"></i> Linhas do tempo recentes
+                    </h5>
                     <div class="timeline-wrapper">
                         {% for analysis in recent_analyses %}
                             <div class="timeline-item">
@@ -160,59 +411,128 @@
                             </div>
                         {% endfor %}
                     </div>
-                {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-emoji-neutral" style="font-size: 48px;"></i>
-                        <p class="mt-3 mb-0">Suas linhas do tempo aparecerão aqui após as primeiras análises.</p>
-                    </div>
-                {% endif %}
+                </div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-mic"></i> Gravações recentes
-                </h5>
-                {% if recordings %}
-                    <div class="list-group list-group-flush">
-                        {% for recording in recordings %}
-                            <a href="{% url 'analyze_audio' recording.id %}" class="list-group-item list-group-item-action">
-                                <div class="d-flex justify-content-between">
-                                    <span class="fw-semibold">{{ recording.title }}</span>
-                                    <small class="text-muted">{{ recording.created_at|date:'d/m/Y H:i' }}</small>
-                                </div>
-                                {% if recording.description %}
-                                    <p class="mb-1 text-muted small">{{ recording.description|truncatewords:12 }}</p>
-                                {% endif %}
-                                {% if recording.emotion_analysis %}
-                                    <span class="emotion-badge emotion-{{ recording.emotion_analysis.dominant_emotion }}">
-                                        {{ recording.emotion_analysis.get_emotion_display_name }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Aguardando análise</span>
-                                {% endif %}
-                            </a>
-                        {% endfor %}
-                    </div>
-                    <div class="text-center mt-3">
-                        <a href="{% url 'history' %}" class="btn btn-outline-primary btn-sm">
-                            Ver todo o histórico
-                        </a>
-                    </div>
-                {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-mic-mute" style="font-size: 48px;"></i>
-                        <p class="mt-3 mb-0">Nenhuma gravação encontrada. Que tal começar uma agora?</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
     {{ block.super }}
+    
+    <!-- Script para o confessionário virtual -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.quick-action-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const target = card.dataset.url;
+                    if (target) {
+                        window.location.href = target;
+                    }
+                });
+            });
+        });
+
+        function saveJournalEntry(buttonRef) {
+            const content = document.getElementById('journal-content').value.trim();
+            if (!content) {
+                alert('Escreva algo antes de salvar! Suas palavras são importantes 💝');
+                return;
+            }
+            
+            const button = buttonRef;
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+            button.disabled = true;
+            
+            // Enviar para a API
+            const csrfToken = document.querySelector('#daily-journal [name=csrfmiddlewaretoken]')?.value || '';
+            fetch('{% url "save_journal_entry" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: content,
+                    mood_rating: null // Pode ser expandido depois
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Limpar o campo
+                    document.getElementById('journal-content').value = '';
+                    
+                    // Feedback positivo
+                    button.innerHTML = '<i class="bi bi-heart-fill"></i> Salvo com carinho!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    
+                    // Mostrar mensagem reconfortante
+                    const messages = [
+                        'Suas palavras foram guardadas com carinho 💝',
+                        'Obrigado por compartilhar seus sentimentos 🌸',
+                        'Você foi corajoso(a) ao expressar isso 💪',
+                        'Seus pensamentos são válidos e importantes ✨',
+                        'Cada palavra sua tem valor especial 🦋'
+                    ];
+                    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                    
+                    // Criar notificação gentil
+                    showGentleNotification(randomMessage);
+                    
+                } else {
+                    alert('Ops! ' + (data.error || 'Algo deu errado. Tente novamente.'));
+                    button.innerHTML = originalHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar. Suas palavras são importantes, tente novamente!');
+                button.innerHTML = originalHtml;
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-primary');
+                    button.disabled = false;
+                }, 3000);
+            });
+        }
+        
+        function showGentleNotification(message) {
+            // Criar notificação suave
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-success position-fixed';
+            notification.style.cssText = `
+                top: 20px; 
+                right: 20px; 
+                z-index: 1050; 
+                max-width: 300px;
+                border: none;
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            `;
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-heart text-success me-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remover automaticamente após 4 segundos
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+    </script>
+    
     {% if emotion_stats %}
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script>

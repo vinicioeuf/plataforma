@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurar Perfil - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4">
+                <h2 class="text-center mb-4">
+                    <i class="bi bi-person-gear"></i>
+                    Configurar Perfil
+                </h2>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Tipo de Usuário -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Tipo de Usuário</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="user_type" id="patient" value="patient" 
+                                       {% if profile.user_type == 'patient' %}checked{% endif %}>
+                                <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" for="patient">
+                                    <i class="bi bi-person" style="font-size: 2rem;"></i>
+                                    <strong>Paciente</strong>
+                                    <small>Busco apoio e cuidado</small>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="user_type" id="professional" value="professional"
+                                       {% if profile.user_type == 'professional' %}checked{% endif %}>
+                                <label class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" for="professional">
+                                    <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
+                                    <strong>Profissional</strong>
+                                    <small>Ofereço cuidado</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações Básicas -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ profile.phone }}" placeholder="(11) 99999-9999">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="birth_date" class="form-label">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="birth_date" name="birth_date" 
+                                   value="{{ profile.birth_date|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    
+                    <!-- Informações para Profissionais -->
+                    <div id="professionalFields" class="{% if profile.user_type != 'professional' %}d-none{% endif %}">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Informações Profissionais</strong><br>
+                            Estes dados são necessários para verificar sua qualificação.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="license_number" class="form-label">Número do Registro Profissional</label>
+                            <input type="text" class="form-control" id="license_number" name="license_number" 
+                                   value="{{ profile.license_number }}" placeholder="Ex: CRP 12345">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="specialization" class="form-label">Especialização</label>
+                            <select class="form-select" id="specialization" name="specialization">
+                                <option value="">Selecione sua especialização</option>
+                                <option value="Psicologia Clínica" {% if profile.specialization == 'Psicologia Clínica' %}selected{% endif %}>Psicologia Clínica</option>
+                                <option value="Psicoterapia" {% if profile.specialization == 'Psicoterapia' %}selected{% endif %}>Psicoterapia</option>
+                                <option value="Psiquiatria" {% if profile.specialization == 'Psiquiatria' %}selected{% endif %}>Psiquiatria</option>
+                                <option value="Neuropsicologia" {% if profile.specialization == 'Neuropsicologia' %}selected{% endif %}>Neuropsicologia</option>
+                                <option value="Terapia Cognitivo-Comportamental" {% if profile.specialization == 'Terapia Cognitivo-Comportamental' %}selected{% endif %}>Terapia Cognitivo-Comportamental</option>
+                                <option value="Psicanálise" {% if profile.specialization == 'Psicanálise' %}selected{% endif %}>Psicanálise</option>
+                                <option value="Psicologia do Desenvolvimento" {% if profile.specialization == 'Psicologia do Desenvolvimento' %}selected{% endif %}>Psicologia do Desenvolvimento</option>
+                                <option value="Outro" {% if profile.specialization == 'Outro' %}selected{% endif %}>Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações para Pacientes -->
+                    <div id="patientFields" class="{% if profile.user_type == 'professional' %}d-none{% endif %}">
+                        <div class="alert alert-success">
+                            <i class="bi bi-heart"></i>
+                            <strong>Bem-vindo(a)!</strong><br>
+                            Você terá acesso aos jogos terapêuticos e poderá agendar consultas com profissionais.
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i>
+                            Salvar Configurações
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i>
+                            Voltar
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Informações sobre tipos de usuário -->
+            <div class="row g-3 mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100 p-3">
+                        <h6 class="fw-bold text-primary">
+                            <i class="bi bi-person"></i> Pacientes
+                        </h6>
+                        <ul class="small text-muted mb-0">
+                            <li>Análise de emoções por áudio</li>
+                            <li>Jogos terapêuticos</li>
+                            <li>Agendamento de consultas</li>
+                            <li>Mensagens com profissionais</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 p-3">
+                        <h6 class="fw-bold text-info">
+                            <i class="bi bi-person-badge"></i> Profissionais
+                        </h6>
+                        <ul class="small text-muted mb-0">
+                            <li>Gerenciamento de consultas</li>
+                            <li>Histórico de pacientes</li>
+                            <li>Sistema de mensagens</li>
+                            <li>Relatórios e anotações</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const patientRadio = document.getElementById('patient');
+    const professionalRadio = document.getElementById('professional');
+    const professionalFields = document.getElementById('professionalFields');
+    const patientFields = document.getElementById('patientFields');
+    
+    function toggleFields() {
+        if (professionalRadio.checked) {
+            professionalFields.classList.remove('d-none');
+            patientFields.classList.add('d-none');
+        } else {
+            professionalFields.classList.add('d-none');
+            patientFields.classList.remove('d-none');
+        }
+    }
+    
+    patientRadio.addEventListener('change', toggleFields);
+    professionalRadio.addEventListener('change', toggleFields);
+    
+    // Executar na carga da página
+    toggleFields();
+});
+</script>
+{% endblock %}

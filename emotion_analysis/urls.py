@@ -15,4 +15,23 @@ urlpatterns = [
     path('process-analysis/<int:recording_id>/', views.process_emotion_analysis, name='process_emotion_analysis'),
     path('history/', views.history, name='history'),
     path('delete/<int:recording_id>/', views.delete_recording, name='delete_recording'),
+    
+    # Configuração de perfil
+    path('profile/setup/', views.profile_setup, name='profile_setup'),
+    
+    # Telepsicologia
+    path('consultations/', views.consultations, name='consultations'),
+    path('consultations/schedule/', views.schedule_consultation, name='schedule_consultation'),
+    path('consultations/<int:consultation_id>/', views.consultation_detail, name='consultation_detail'),
+    path('consultations/<int:consultation_id>/message/', views.send_message, name='send_message'),
+    
+    # Jogos
+    path('games/', views.games_menu, name='games_menu'),
+    path('games/memory/', views.memory_game, name='memory_game'),
+    path('games/breathing/', views.breathing_exercise, name='breathing_exercise'),
+    path('games/color-matching/', views.color_matching_game, name='color_matching_game'),
+    path('games/save-score/', views.save_game_score, name='save_game_score'),
+    
+    # Confessionário Virtual
+    path('journal/save/', views.save_journal_entry, name='save_journal_entry'),
 ]

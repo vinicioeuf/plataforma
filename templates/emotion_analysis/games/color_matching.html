@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Jogo de Cores - Plataforma de Saúde Mental{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h1 class="text-center mb-4">🎨 Jogo de Combinação de Cores</h1>
+            
+            <div class="row text-center mb-4">
+                <div class="col-md-4">
+                    <h5>Score: <span id="score">0</span></h5>
+                </div>
+                <div class="col-md-4">
+                    <h5>Nível: <span id="level">1</span></h5>
+                </div>
+                <div class="col-md-4">
+                    <h5>Tempo: <span id="timer">30</span>s</h5>
+                </div>
+            </div>
+
+            <div class="card shadow p-4 mb-4">
+                <div class="text-center">
+                    <h4 class="mb-4">Clique na cor que combina com o texto!</h4>
+                    
+                    <div id="color-name" class="color-name">
+                        <!-- Nome da cor será inserido aqui -->
+                    </div>
+                    
+                    <div id="color-buttons" class="color-buttons mt-5">
+                        <!-- Botões de cores serão inseridos aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" onclick="startGame()">Começar</button>
+                <a href="{% url 'games_menu' %}" class="btn btn-secondary btn-lg">Voltar</a>
+            </div>
+
+            <div id="game-over-message" class="alert alert-info mt-4" style="display: none;">
+                <h4>Tempo Acabou! ⏰</h4>
+                <p>Seu Score Final: <strong id="final-score">0</strong></p>
+                <button class="btn btn-success" onclick="submitScore()">Salvar Score</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .color-name {
+        font-size: 2.5rem;
+        font-weight: bold;
+        padding: 30px;
+        border-radius: 10px;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .color-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .color-btn {
+        height: 80px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        color: white;
+        font-weight: bold;
+    }
+
+    .color-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .color-btn:active {
+        transform: scale(0.95);
+    }
+</style>
+
+<script>
+    const colors = [
+        { name: 'Vermelho', hex: '#FF6B6B' },
+        { name: 'Azul', hex: '#4ECDC4' },
+        { name: 'Verde', hex: '#45B7D1' },
+        { name: 'Amarelo', hex: '#FFA502' },
+        { name: 'Roxo', hex: '#9B59B6' },
+        { name: 'Rosa', hex: '#FF69B4' }
+    ];
+
+    let gameActive = false;
+    let score = 0;
+    let level = 1;
+    let timeLeft = 30;
+    let currentColor = null;
+    let timerInterval = null;
+
+    function startGame() {
+        gameActive = true;
+        score = 0;
+        level = 1;
+        timeLeft = 30;
+        
+        document.getElementById('score').textContent = score;
+        document.getElementById('level').textContent = level;
+        document.getElementById('game-over-message').style.display = 'none';
+        document.querySelector('.btn-primary').disabled = true;
+        
+        startTimer();
+        nextRound();
+    }
+
+    function nextRound() {
+        if (!gameActive) return;
+        
+        currentColor = colors[Math.floor(Math.random() * colors.length)];
+        const colorName = document.getElementById('color-name');
+        colorName.textContent = currentColor.name;
+        colorName.style.color = currentColor.hex;
+        
+        // Embaralhar cores
+        const shuffled = [...colors].sort(() => Math.random() - 0.5).slice(0, 3);
+        
+        const buttonsDiv = document.getElementById('color-buttons');
+        buttonsDiv.innerHTML = '';
+        
+        shuffled.forEach(color => {
+            const btn = document.createElement('button');
+            btn.className = 'color-btn';
+            btn.style.backgroundColor = color.hex;
+            btn.textContent = color.name;
+            btn.onclick = () => checkAnswer(color);
+            buttonsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected) {
+        if (!gameActive) return;
+        
+        if (selected.name === currentColor.name) {
+            score += 10;
+            document.getElementById('score').textContent = score;
+            nextRound();
+        }
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        document.getElementById('game-over-message').style.display = 'block';
+        document.getElementById('final-score').textContent = score;
+        document.querySelector('.btn-primary').disabled = false;
+        document.querySelector('.btn-primary').textContent = 'Jogar Novamente';
+    }
+
+    function submitScore() {
+        fetch('{% url "save_game_score" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                game_name: 'Color Matching',
+                score: score,
+                time_spent: 30
+            })
+        }).then(r => r.json()).then(d => {
+            alert('Score salvo!');
+        });
+    }
+</script>
+{% endblock %}

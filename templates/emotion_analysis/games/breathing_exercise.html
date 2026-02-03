@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Exercício de Respiração - Plataforma de Saúde Mental{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h1 class="text-center mb-4">🫁 Exercício de Respiração Guiado</h1>
+            
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <p class="text-muted mb-4">Siga as instruções para um exercício de respiração relaxante</p>
+                    
+                    <div id="breathing-circle" class="breathing-circle"></div>
+                    
+                    <h3 id="instruction" class="mt-4 mb-4">Prepare-se</h3>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-12">
+                            <h5>Ciclos Completados: <span id="cycles">0</span>/4</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-success btn-lg" onclick="startExercise()">Começar</button>
+                        <a href="{% url 'games_menu' %}" class="btn btn-secondary btn-lg">Voltar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .breathing-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 30px auto;
+        box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    @keyframes breathe-in {
+        0% {
+            width: 200px;
+            height: 200px;
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
+        }
+        100% {
+            width: 300px;
+            height: 300px;
+            box-shadow: 0 5px 50px rgba(102, 126, 234, 0.8);
+        }
+    }
+
+    @keyframes breathe-out {
+        0% {
+            width: 300px;
+            height: 300px;
+            box-shadow: 0 5px 50px rgba(102, 126, 234, 0.8);
+        }
+        100% {
+            width: 200px;
+            height: 200px;
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
+        }
+    }
+
+    .breathing-circle.inhale {
+        animation: breathe-in 4s ease-in-out forwards;
+    }
+
+    .breathing-circle.exhale {
+        animation: breathe-out 4s ease-in-out forwards;
+    }
+</style>
+
+<script>
+    let isExercising = false;
+    let cycles = 0;
+
+    function startExercise() {
+        if (isExercising) return;
+        
+        isExercising = true;
+        cycles = 0;
+        document.getElementById('cycles').textContent = 0;
+        document.querySelector('.btn-success').disabled = true;
+        
+        runCycle();
+    }
+
+    function runCycle() {
+        if (cycles >= 4) {
+            endExercise();
+            return;
+        }
+
+        cycles++;
+        document.getElementById('cycles').textContent = cycles;
+
+        // Inspiração
+        const circle = document.getElementById('breathing-circle');
+        circle.className = 'breathing-circle inhale';
+        document.getElementById('instruction').textContent = 'Inspire...';
+        
+        setTimeout(() => {
+            // Pausa
+            circle.className = 'breathing-circle';
+            document.getElementById('instruction').textContent = 'Segure...';
+            
+            setTimeout(() => {
+                // Expiração
+                circle.className = 'breathing-circle exhale';
+                document.getElementById('instruction').textContent = 'Expire...';
+                
+                setTimeout(() => {
+                    circle.className = 'breathing-circle';
+                    document.getElementById('instruction').textContent = 'Pausa...';
+                    
+                    setTimeout(() => {
+                        runCycle();
+                    }, 2000);
+                }, 4000);
+            }, 4000);
+        }, 4000);
+    }
+
+    function endExercise() {
+        isExercising = false;
+        document.getElementById('instruction').textContent = '✨ Exercício Completo! Você se sente melhor?';
+        document.querySelector('.btn-success').disabled = false;
+        document.querySelector('.btn-success').textContent = 'Refazer';
+        
+        // Salvar como atividade
+        fetch('{% url "save_game_score" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                game_name: 'Breathing Exercise',
+                score: 50,
+                time_spent: 128
+            })
+        });
+    }
+</script>
+{% endblock %}

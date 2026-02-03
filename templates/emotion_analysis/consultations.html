@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultas - EmotionAI{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h1 class="page-heading d-flex align-items-center gap-2">
+                <i class="bi bi-calendar-heart"></i>
+                {% if profile.user_type == 'professional' %}
+                    Minhas Consultas
+                {% else %}
+                    Consultas Agendadas
+                {% endif %}
+            </h1>
+            <p class="page-subtitle">
+                {% if profile.user_type == 'professional' %}
+                    Gerencie suas consultas e acompanhe seus pacientes.
+                {% else %}
+                    Agende e acompanhe suas consultas com profissionais de saúde mental.
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-lg-4">
+            {% if profile.user_type == 'patient' %}
+                <a href="{% url 'schedule_consultation' %}" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-plus-circle"></i> Nova Consulta
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if consultations %}
+        <div class="row g-4">
+            {% for consultation in consultations %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>{{ consultation.title }}</strong>
+                            <span class="badge 
+                                {% if consultation.status == 'scheduled' %}bg-primary
+                                {% elif consultation.status == 'in_progress' %}bg-warning
+                                {% elif consultation.status == 'completed' %}bg-success
+                                {% else %}bg-secondary{% endif %}">
+                                {{ consultation.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            {% if profile.user_type == 'professional' %}
+                                <h6 class="card-title">
+                                    <i class="bi bi-person"></i>
+                                    {{ consultation.patient.get_full_name|default:consultation.patient.username }}
+                                </h6>
+                            {% else %}
+                                <h6 class="card-title">
+                                    <i class="bi bi-person-badge"></i>
+                                    Dr(a). {{ consultation.professional.get_full_name|default:consultation.professional.username }}
+                                </h6>
+                            {% endif %}
+                            
+                            <p class="card-text">
+                                <i class="bi bi-calendar"></i>
+                                {{ consultation.scheduled_datetime|date:'d/m/Y' }}<br>
+                                <i class="bi bi-clock"></i>
+                                {{ consultation.scheduled_datetime|date:'H:i' }} ({{ consultation.duration_minutes }} min)
+                            </p>
+                            
+                            {% if consultation.description %}
+                                <p class="card-text small text-muted">{{ consultation.description|truncatewords:15 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'consultation_detail' consultation.id %}" class="btn btn-sm btn-primary flex-fill">
+                                    <i class="bi bi-eye"></i> Ver Detalhes
+                                </a>
+                                {% if consultation.status == 'scheduled' %}
+                                    <a href="{% url 'consultation_detail' consultation.id %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-chat"></i> Chat
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card p-5">
+            <div class="text-center">
+                <i class="bi bi-calendar-x text-muted" style="font-size: 48px;"></i>
+                <h4 class="mt-3">Nenhuma consulta encontrada</h4>
+                {% if profile.user_type == 'patient' %}
+                    <p class="text-muted">Você ainda não agendou nenhuma consulta.</p>
+                    <a href="{% url 'schedule_consultation' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Agendar Primeira Consulta
+                    </a>
+                {% else %}
+                    <p class="text-muted">Você ainda não tem consultas agendadas.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Profissionais disponíveis (apenas para pacientes) -->
+    {% if profile.user_type == 'patient' and professionals %}
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <h4 class="mb-3">
+                    <i class="bi bi-people"></i> Profissionais Disponíveis
+                </h4>
+            </div>
+            {% for professional in professionals %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="bi bi-person-badge"></i>
+                                Dr(a). {{ professional.get_full_name|default:professional.username }}
+                            </h6>
+                            {% if professional.userprofile.specialization %}
+                                <p class="card-text">
+                                    <small class="text-muted">{{ professional.userprofile.specialization }}</small>
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'schedule_consultation' %}?professional={{ professional.id }}" class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-calendar-plus"></i> Agendar Consulta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Jogos - Plataforma de Saúde Mental{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">🎮 Jogos para Bem-estar</h1>
+            <p class="text-muted">Distraia sua mente com estes jogos simples e relaxantes</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-body text-center">
+                    <div class="mb-3" style="font-size: 3rem;">🧠</div>
+                    <h5 class="card-title">Jogo da Memória</h5>
+                    <p class="card-text text-muted">Teste sua memória encontrando pares de cartas</p>
+                    <a href="{% url 'memory_game' %}" class="btn btn-primary">Jogar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-body text-center">
+                    <div class="mb-3" style="font-size: 3rem;">🫁</div>
+                    <h5 class="card-title">Exercício de Respiração</h5>
+                    <p class="card-text text-muted">Exercício guiado de respiração para relaxamento</p>
+                    <a href="{% url 'breathing_exercise' %}" class="btn btn-primary">Começar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-body text-center">
+                    <div class="mb-3" style="font-size: 3rem;">🎨</div>
+                    <h5 class="card-title">Jogo de Cores</h5>
+                    <p class="card-text text-muted">Combine cores rapidamente para pontuar</p>
+                    <a href="{% url 'color_matching_game' %}" class="btn btn-primary">Jogar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h3 class="mb-4">📊 Seus Melhores Scores</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for game in top_games %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{{ game.game_name }}</h6>
+                    <p class="mb-0">
+                        <strong>Score:</strong> {{ game.score }} | 
+                        <strong>Data:</strong> {{ game.played_at|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-md-12">
+            <p class="text-muted">Nenhum score registrado ainda. Comece a jogar!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+{% endblock %}

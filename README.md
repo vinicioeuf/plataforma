@@ -6,12 +6,28 @@ Plataforma web desenvolvida em Django e Bootstrap para análise de emoções atr
 
 ## ✨ Funcionalidades
 
+### Análise de Emoções
 - 🎤 **Gravação de Áudio**: Grave áudios diretamente pelo navegador
 - 📤 **Upload de Arquivos**: Envie arquivos de áudio existentes (MP3, WAV, OGG, WebM, M4A)
-- 🔐 **Sistema de Autenticação**: Registro, login e logout de usuários
-- 📊 **Dashboard Interativo**: Visualize estatísticas e histórico de análises
 - 😊 **Análise de Emoções**: Identifica 7 emoções principais (Alegria, Tristeza, Raiva, Medo, Surpresa, Nojo, Neutro)
 - 📜 **Histórico**: Acesse todas as suas gravações e análises anteriores
+- 📊 **Dashboard Interativo**: Visualize estatísticas e histórico de análises
+
+### Telepsicologia (NOVO)
+- 👨‍⚕️ **Sistema de Consultas**: Pacientes podem agendar consultas com profissionais de saúde mental
+- 💬 **Chat de Consulta**: Comunicação em tempo real entre paciente e profissional durante consultas
+- 📅 **Agendamento de Consultas**: Sistema inteligente para agendar consultas
+- 👥 **Perfis de Usuário**: Tipos de usuário diferentes (Paciente e Profissional)
+- 📋 **Histórico de Consultas**: Acompanhe todas as consultas passadas e futuras
+
+### Jogos Interativos (NOVO)
+- 🧠 **Jogo da Memória**: Teste sua memória com um clássico jogo de cartas
+- 🫁 **Exercício de Respiração**: Exercício guiado para relaxamento e redução do stress
+- 🎨 **Jogo de Cores**: Combine cores rapidamente para aumentar a pontuação
+- 🏆 **Sistema de Scores**: Acompanhe seus melhores scores em todos os jogos
+
+### Gerais
+- 🔐 **Sistema de Autenticação**: Registro, login e logout de usuários
 - 🎨 **Interface Responsiva**: Design moderno com Bootstrap 5
 
 ## 🛠️ Tecnologias Utilizadas
@@ -77,17 +93,48 @@ Plataforma web desenvolvida em Django e Bootstrap para análise de emoções atr
 
 ## 🎯 Como Usar
 
-### Para Usuários
+### Para Pacientes
 
 1. **Cadastro**: Crie uma conta na página de registro
 2. **Login**: Faça login com suas credenciais
-3. **Gravar Áudio**: 
+3. **Configurar Perfil**: Acesse "Meu Perfil" e selecione "Paciente" como tipo de usuário
+4. **Análise de Emoções**: 
    - Acesse "Nova Gravação"
    - Escolha entre gravar um áudio ou fazer upload de um arquivo
    - Adicione um título e descrição (opcional)
    - Envie para análise
-4. **Visualizar Resultados**: Veja a emoção dominante e a distribuição de todas as emoções
-5. **Histórico**: Acesse todas as suas gravações anteriores
+5. **Jogar**: Acesse a seção "Jogos" para se distrair com:
+   - Jogo da Memória
+   - Exercício de Respiração Guiado
+   - Jogo de Combinação de Cores
+6. **Agendar Consulta**: 
+   - Acesse "Consultas" → "Agendar Consulta"
+   - Selecione um profissional de saúde mental
+   - Escolha data e horário
+   - Receba confirmação do profissional
+7. **Participar de Consulta**:
+   - Acesse a consulta agendada
+   - Use o chat para se comunicar com o profissional
+   - Compartilhe informações sobre seu estado emocional
+
+### Para Profissionais de Saúde Mental
+
+1. **Cadastro**: Crie uma conta na página de registro
+2. **Login**: Faça login com suas credenciais
+3. **Configurar Perfil Profissional**: 
+   - Acesse "Meu Perfil"
+   - Selecione "Profissional" como tipo de usuário
+   - Adicione número de registro/crédito
+   - Indique sua especialização (Psicólogo, Psiquiatra, etc.)
+4. **Gerenciar Consultas**:
+   - Acesse "Consultas" para ver todas as solicitações e consultas agendadas
+   - Confirme ou rejeite solicitações de consulta
+   - Acompanhe seu calendário de consultas
+5. **Atender Pacientes**:
+   - Acesse a consulta no horário agendado
+   - Use o chat para comunicação em tempo real
+   - Adicione notas sobre a consulta
+   - Marque como concluída ao finalizar
 
 ### Para Desenvolvedores - Integrar Script de Análise de Emoções
 
@@ -121,24 +168,37 @@ plataforma/
 │   ├── urls.py
 │   └── wsgi.py
 ├── emotion_analysis/            # App principal
-│   ├── models.py               # Modelos de dados
-│   ├── views.py                # Lógica de negócio
+│   ├── models.py               # Modelos: AudioRecording, EmotionAnalysis, UserProfile, 
+│   │                           #         Consultation, Message, GameScore
+│   ├── views.py                # Lógica de negócio (análise, telepsicologia, jogos)
 │   ├── forms.py                # Formulários
 │   ├── urls.py                 # Rotas
 │   └── admin.py                # Configuração do admin
 ├── templates/                   # Templates HTML
-│   ├── base.html
+│   ├── base.html               # Template base
 │   └── emotion_analysis/
-│       ├── home.html
-│       ├── login.html
-│       ├── register.html
-│       ├── dashboard.html
-│       ├── record_audio.html
-│       ├── analyze_audio.html
-│       ├── history.html
-│       └── delete_recording.html
+│       ├── home.html           # Página inicial
+│       ├── login.html          # Login
+│       ├── register.html       # Registro
+│       ├── dashboard.html      # Dashboard (paciente/profissional)
+│       ├── profile_setup.html  # Configuração de perfil
+│       ├── record_audio.html   # Gravação/upload de áudio
+│       ├── analyze_audio.html  # Análise de emoções
+│       ├── history.html        # Histórico de gravações
+│       ├── delete_recording.html # Deletar gravação
+│       ├── consultations.html  # Lista de consultas
+│       ├── consultation_detail.html # Detalhes da consulta + chat
+│       ├── schedule_consultation.html # Agendar consulta
+│       └── games/              # Seção de jogos
+│           ├── games_menu.html # Menu de jogos
+│           ├── memory_game.html # Jogo da memória
+│           ├── breathing_exercise.html # Exercício de respiração
+│           └── color_matching.html # Jogo de cores
 ├── media/                       # Arquivos de áudio enviados
 ├── static/                      # Arquivos estáticos (CSS, JS)
+│   ├── css/
+│   │   └── main.css            # Estilos personalizados
+│   └── modelo/                 # Modelos treinados
 ├── manage.py
 └── requirements.txt
 ```
@@ -153,12 +213,73 @@ plataforma/
 - Armazena os resultados da análise de emoções
 - Campos: recording, dominant_emotion, confidence, emotions_data, notes, analyzed_at
 
+### UserProfile
+- Perfil estendido do usuário com tipos diferentes
+- Tipos: Paciente e Profissional
+- Campos: user, user_type, phone, birth_date, license_number, specialization, notifications_enabled
+
+### Consultation
+- Consultas de telepsicologia agendadas
+- Estados: Agendada, Em Andamento, Concluída, Cancelada
+- Campos: patient, professional, title, description, scheduled_datetime, duration_minutes, status, notes
+
+### Message
+- Mensagens entre paciente e profissional
+- Campos: sender, recipient, consultation, content, is_read, created_at
+
+### GameScore
+- Pontuações dos jogos dos usuários
+- Campos: user, game_name, score, time_spent, created_at
+
 ## 🔒 Segurança
 
 - Autenticação de usuários obrigatória para todas as funcionalidades principais
 - Proteção CSRF em todos os formulários
 - Validação de tipos de arquivo no upload
 - Cada usuário só pode acessar suas próprias gravações
+- Isolamento de dados entre pacientes e profissionais
+- Permissões específicas por tipo de usuário
+
+## ✨ Novidades na Versão 2.0
+
+### Sistema de Telepsicologia
+- Pacientes podem agendar consultas com profissionais
+- Sistema de chat integrado para comunicação durante consultas
+- Profissionais podem adicionar notas sobre consultas
+- Histórico completo de consultas
+- Status de consulta em tempo real
+
+### Sistema de Jogos
+- **Jogo da Memória**: 12 cartas para testar concentração (com flip animation)
+- **Exercício de Respiração**: 4 ciclos de respiração guiada com animação visual
+- **Jogo de Cores**: Combine cores rapidamente com dificuldade progressiva
+- Sistema de pontuação automático
+- Histórico de scores salvos
+
+### Perfis de Usuário
+- Dois tipos de usuário distintos: Paciente e Profissional
+- Cada tipo tem funcionalidades específicas
+- Profissionais podem adicionar credenciais e especialização
+
+## 🎮 Detalhes dos Jogos
+
+### Jogo da Memória
+- 12 cartas com emojis diferentes
+- Encontre todos os 6 pares
+- Acompanhe tentativas e tempo
+- Score baseado em eficiência
+
+### Exercício de Respiração
+- Instruções guiadas: Inspire (4s), Segure (4s), Expire (4s), Pausa (2s)
+- 4 ciclos completos
+- Animação de respiração visual
+- Relaxamento garantido
+
+### Jogo de Cores
+- 30 segundos para marcar o máximo de pontos
+- Combine o texto com a cor correspondente
+- Dificuldade aumenta com os acertos
+- Pontuação em tempo real
 
 ## 🎨 Interface
 
