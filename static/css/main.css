@@ -1,3 +1,11 @@
+/* Other styles */
+
+textarea#journal-content {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+    background: rgba(0,0,0,0.05);
+}
 :root {
     --primary-500: #6366f1;
     --primary-400: #818cf8;
