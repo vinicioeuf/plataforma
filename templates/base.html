@@ -4,18 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Plataforma de Análise de Emoções{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
+    <title>{% block title %}EmotionAI - Plataforma de Análise de Emoções{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
     {% block extra_css %}{% endblock %}
 </head>
 <body class="app-body">
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{% url 'home' %}">
@@ -28,48 +23,41 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
+                            <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'record_audio' %}">
-                                <i class="bi bi-mic"></i> Nova Gravação
-                            </a>
+                            <a class="nav-link" href="{% url 'record_audio' %}"><i class="bi bi-mic"></i> Nova Gravação</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'games_menu' %}">
-                                <i class="bi bi-controller"></i> Jogos
-                            </a>
+                            <a class="nav-link" href="{% url 'games_menu' %}"><i class="bi bi-controller"></i> Jogos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'consultations' %}">
-                                <i class="bi bi-calendar-heart"></i> Consultas
-                            </a>
+                            <a class="nav-link" href="{% url 'consultations' %}"><i class="bi bi-calendar-heart"></i> Consultas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}#journal-space">
-                                <i class="bi bi-journal-heart"></i> Diário
-                            </a>
+                            <a class="nav-link" href="{% url 'journal_feed' %}"><i class="bi bi-journal-heart"></i> Diário</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'history' %}">
-                                <i class="bi bi-clock-history"></i> Histórico
+                            <a class="nav-link" href="{% url 'friends_list' %}"><i class="bi bi-people"></i> Amigos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'history' %}"><i class="bi bi-clock-history"></i> Histórico</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'notifications' %}">
+                                <i class="bi bi-bell"></i>
+                                <span class="notification-badge" id="nav-notif-badge" style="display:none;"></span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
-                               data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.username }}
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'profile_setup' %}">
-                                    <i class="bi bi-gear"></i> Configurações
-                                </a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile_setup' %}"><i class="bi bi-gear"></i> Configurações</a></li>
+                                <li><a class="dropdown-item" href="{% url 'support_groups' %}"><i class="bi bi-chat-dots"></i> Grupos de Apoio</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">
-                                    <i class="bi bi-box-arrow-right"></i> Sair
-                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
                             </ul>
                         </li>
                     {% else %}
@@ -77,9 +65,7 @@
                             <a class="nav-link" href="{% url 'login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'register' %}">
-                                Cadastrar
-                            </a>
+                            <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'register' %}">Cadastrar</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -87,11 +73,10 @@
         </div>
     </nav>
 
-    <!-- Messages -->
     {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate-fade-in" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -99,23 +84,39 @@
         </div>
     {% endif %}
 
-    <!-- Content -->
     <div class="content-wrapper">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Footer -->
-    <footer class="text-center">
+    <footer class="text-center py-3">
         <div class="container">
-            <p class="mb-0 text-muted">
-                &copy; 2025 EmotionAI - Plataforma de Análise de Emoções | TCC
-            </p>
+            <p class="mb-0 text-muted">&copy; 2025 EmotionAI - Plataforma de Análise de Emoções | TCC</p>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+    {% if user.is_authenticated %}
+    <script>
+        // Poll notification count
+        function updateNotifBadge() {
+            fetch('{% url "get_unread_count" %}')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('nav-notif-badge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }).catch(() => {});
+        }
+        updateNotifBadge();
+        setInterval(updateNotifBadge, 30000);
+    </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

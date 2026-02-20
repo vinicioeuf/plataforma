@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Grupos de Apoio - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h1 class="page-heading"><i class="bi bi-people"></i> Grupos de Apoio</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                <i class="bi bi-plus-lg"></i> Criar Grupo
+            </button>
+        </div>
+    </div>
+
+    {% if my_groups %}
+    <h5 class="fw-bold mb-3"><i class="bi bi-star"></i> Meus Grupos</h5>
+    <div class="row g-3 mb-4">
+        {% for group in my_groups %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card p-3 h-100" style="border-left:4px solid var(--primary);">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span style="font-size:2rem;">{{ group.emoji }}</span>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ group.name }}</h6>
+                        <small class="text-muted">{{ group.members.count }} membros</small>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">{{ group.description|truncatechars:80 }}</p>
+                <a href="{% url 'group_chat' group.id %}" class="btn btn-sm btn-primary mt-auto">
+                    <i class="bi bi-chat-dots"></i> Entrar no Chat
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h5 class="fw-bold mb-3"><i class="bi bi-globe"></i> Todos os Grupos</h5>
+    <div class="row g-3">
+        {% for group in groups %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span style="font-size:2rem;">{{ group.emoji }}</span>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ group.name }}</h6>
+                        <small class="text-muted">{{ group.members.count }}/{{ group.max_members }} membros</small>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">{{ group.description|truncatechars:100 }}</p>
+                <div class="progress mb-2" style="height:4px;background:rgba(255,255,255,.1);">
+                    <div class="progress-bar" style="width:{% widthratio group.members.count group.max_members 100 %}%;"></div>
+                </div>
+                {% if request.user in group.members.all %}
+                <a href="{% url 'group_chat' group.id %}" class="btn btn-sm btn-success mt-auto">
+                    <i class="bi bi-chat-dots"></i> Chat
+                </a>
+                {% else %}
+                <button class="btn btn-sm btn-outline-primary mt-auto join-btn" data-group-id="{{ group.id }}">
+                    <i class="bi bi-box-arrow-in-right"></i> Participar
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div style="font-size:3rem;">🤝</div>
+            <p class="text-muted mt-2">Nenhum grupo criado ainda. Seja o primeiro!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Group Modal -->
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:var(--bg-card);color:white;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Criar Grupo de Apoio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'create_support_group' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Grupo</label>
+                        <input type="text" name="name" class="form-control" required placeholder="Ex: Ansiedade e Esperança" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea name="description" class="form-control" rows="3" required placeholder="Sobre o que é este grupo..." style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Emoji do Grupo</label>
+                        <select name="emoji" class="form-select" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+                            <option value="💬">💬 Conversa</option>
+                            <option value="🤗">🤗 Apoio</option>
+                            <option value="🧘">🧘 Meditação</option>
+                            <option value="💪">💪 Motivação</option>
+                            <option value="🌈">🌈 Esperança</option>
+                            <option value="🫂">🫂 Acolhimento</option>
+                            <option value="🌿">🌿 Calma</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.join-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const gid=this.dataset.groupId;
+        fetch(`/groups/${gid}/join/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+        .then(r=>r.json()).then(d=>{
+            if(d.success)location.reload();
+            else alert(d.error||'Erro');
+        });
+    });
+});
+</script>
+{% endblock %}

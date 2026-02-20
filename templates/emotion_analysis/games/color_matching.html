@@ -1,193 +1,142 @@
 {% extends 'base.html' %}
-
-{% block title %}Jogo de Cores - Plataforma de Saúde Mental{% endblock %}
-
+{% block title %}Jogo de Cores - EmotionAI{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <h1 class="text-center mb-4">🎨 Jogo de Combinação de Cores</h1>
-            
-            <div class="row text-center mb-4">
-                <div class="col-md-4">
-                    <h5>Score: <span id="score">0</span></h5>
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-palette"></i> Jogo de Cores</h1>
+            <p class="text-muted">Combine a cor correta o mais rápido possível!</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div><span class="badge bg-primary fs-6" id="scoreDisplay">Pontos: 0</span>
+            <span class="badge bg-danger fs-6 ms-2" id="livesDisplay">❤️ 3</span></div>
+            <span class="badge bg-info fs-6" id="timerDisplay">⏱️ 0:00</span>
+            <span class="badge bg-secondary fs-6" id="levelDisplay">Nível 1</span>
+        </div>
+        <div class="progress mt-2" style="height:6px;background:rgba(255,255,255,.1);">
+            <div id="timeBar" class="progress-bar bg-success" style="width:100%;transition:width .1s linear;"></div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div id="gameArea" class="text-center">
+                <div class="card p-4 mb-3" id="targetCard">
+                    <p class="text-muted mb-2">Encontre esta cor:</p>
+                    <div id="targetColor" style="width:120px;height:120px;border-radius:20px;margin:0 auto;border:3px solid rgba(255,255,255,.2);"></div>
+                    <p id="colorName" class="fw-bold mt-2 fs-5"></p>
                 </div>
-                <div class="col-md-4">
-                    <h5>Nível: <span id="level">1</span></h5>
-                </div>
-                <div class="col-md-4">
-                    <h5>Tempo: <span id="timer">30</span>s</h5>
+                <div id="optionsGrid" class="d-flex flex-wrap justify-content-center gap-3"></div>
+            </div>
+            <div id="startScreen" class="text-center">
+                <div class="card p-5">
+                    <div style="font-size:4rem;">🎨</div>
+                    <h3 class="fw-bold mt-3">Jogo de Cores</h3>
+                    <p class="text-muted">Identifique a cor correta entre as opções.<br>Cuidado: conforme avança, as cores ficam mais parecidas!</p>
+                    <button class="btn btn-success btn-lg mt-3" onclick="startGame()"><i class="bi bi-play-fill"></i> Começar</button>
                 </div>
             </div>
-
-            <div class="card shadow p-4 mb-4">
-                <div class="text-center">
-                    <h4 class="mb-4">Clique na cor que combina com o texto!</h4>
-                    
-                    <div id="color-name" class="color-name">
-                        <!-- Nome da cor será inserido aqui -->
-                    </div>
-                    
-                    <div id="color-buttons" class="color-buttons mt-5">
-                        <!-- Botões de cores serão inseridos aqui -->
-                    </div>
+            <div id="gameOver" class="card p-4 mt-3 text-center d-none" style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(33,150,243,.15));border:2px solid rgba(76,175,80,.4);">
+                <h3>🎨 Fim de Jogo!</h3>
+                <div class="d-flex justify-content-center gap-3 my-3">
+                    <span class="badge bg-primary fs-5 p-2" id="finalScore">0 pts</span>
+                    <span class="badge bg-info fs-5 p-2" id="finalLevel">Nível 1</span>
                 </div>
-            </div>
-
-            <div class="text-center">
-                <button class="btn btn-primary btn-lg" onclick="startGame()">Começar</button>
-                <a href="{% url 'games_menu' %}" class="btn btn-secondary btn-lg">Voltar</a>
-            </div>
-
-            <div id="game-over-message" class="alert alert-info mt-4" style="display: none;">
-                <h4>Tempo Acabou! ⏰</h4>
-                <p>Seu Score Final: <strong id="final-score">0</strong></p>
-                <button class="btn btn-success" onclick="submitScore()">Salvar Score</button>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-success" onclick="startGame()"><i class="bi bi-arrow-clockwise"></i> Jogar Novamente</button>
+                    <a href="{% url 'games_menu' %}" class="btn btn-outline-light">Menu</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .color-name {
-        font-size: 2.5rem;
-        font-weight: bold;
-        padding: 30px;
-        border-radius: 10px;
-        min-height: 100px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .color-buttons {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-    }
-
-    .color-btn {
-        height: 80px;
-        font-size: 1.2rem;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        color: white;
-        font-weight: bold;
-    }
-
-    .color-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .color-btn:active {
-        transform: scale(0.95);
-    }
-</style>
-
 <script>
-    const colors = [
-        { name: 'Vermelho', hex: '#FF6B6B' },
-        { name: 'Azul', hex: '#4ECDC4' },
-        { name: 'Verde', hex: '#45B7D1' },
-        { name: 'Amarelo', hex: '#FFA502' },
-        { name: 'Roxo', hex: '#9B59B6' },
-        { name: 'Rosa', hex: '#FF69B4' }
-    ];
+const COLORS=[
+    {name:'Vermelho',hex:'#EF5350'},{name:'Azul',hex:'#42A5F5'},{name:'Verde',hex:'#66BB6A'},
+    {name:'Amarelo',hex:'#FFEE58'},{name:'Roxo',hex:'#AB47BC'},{name:'Laranja',hex:'#FFA726'},
+    {name:'Rosa',hex:'#EC407A'},{name:'Ciano',hex:'#26C6DA'},{name:'Lima',hex:'#D4E157'},
+    {name:'Índigo',hex:'#5C6BC0'},{name:'Âmbar',hex:'#FFB300'},{name:'Teal',hex:'#26A69A'},
+    {name:'Coral',hex:'#FF7043'},{name:'Lavanda',hex:'#7E57C2'},{name:'Pêssego',hex:'#FF8A65'},
+];
+let score=0,lives=3,level=1,seconds=0,timer=null,roundTimer=null,roundTime=5,gameActive=false;
 
-    let gameActive = false;
-    let score = 0;
-    let level = 1;
-    let timeLeft = 30;
-    let currentColor = null;
-    let timerInterval = null;
+function startGame(){
+    score=0;lives=3;level=1;seconds=0;gameActive=true;roundTime=5;
+    document.getElementById('startScreen').classList.add('d-none');
+    document.getElementById('gameOver').classList.add('d-none');
+    document.getElementById('gameArea').style.display='block';
+    updateDisplay();
+    clearInterval(timer);
+    timer=setInterval(()=>{seconds++;document.getElementById('timerDisplay').textContent='⏱️ '+formatTime(seconds);},1000);
+    nextRound();
+}
 
-    function startGame() {
-        gameActive = true;
-        score = 0;
-        level = 1;
-        timeLeft = 30;
-        
-        document.getElementById('score').textContent = score;
-        document.getElementById('level').textContent = level;
-        document.getElementById('game-over-message').style.display = 'none';
-        document.querySelector('.btn-primary').disabled = true;
-        
-        startTimer();
-        nextRound();
+function nextRound(){
+    if(!gameActive||lives<=0)return endGame();
+    const numOptions=Math.min(4+Math.floor(level/3),8);
+    const shuffled=[...COLORS].sort(()=>Math.random()-.5);
+    const options=shuffled.slice(0,numOptions);
+    const target=options[Math.floor(Math.random()*options.length)];
+    
+    document.getElementById('targetColor').style.backgroundColor=target.hex;
+    document.getElementById('colorName').textContent=target.name;
+    
+    const grid=document.getElementById('optionsGrid');grid.innerHTML='';
+    options.sort(()=>Math.random()-.5).forEach(c=>{
+        const btn=document.createElement('button');
+        btn.className='color-option';
+        btn.style.cssText=`width:80px;height:80px;border-radius:16px;border:3px solid transparent;background:${c.hex};cursor:pointer;transition:all .2s ease;`;
+        btn.addEventListener('mouseenter',()=>btn.style.transform='scale(1.1)');
+        btn.addEventListener('mouseleave',()=>btn.style.transform='scale(1)');
+        btn.addEventListener('click',()=>checkAnswer(c,target,btn));
+        grid.appendChild(btn);
+    });
+    
+    // Round timer
+    let timeLeft=roundTime*10;
+    const bar=document.getElementById('timeBar');bar.style.width='100%';bar.className='progress-bar bg-success';
+    clearInterval(roundTimer);
+    roundTimer=setInterval(()=>{
+        timeLeft--;
+        bar.style.width=(timeLeft/(roundTime*10)*100)+'%';
+        if(timeLeft<roundTime*3)bar.className='progress-bar bg-danger';
+        else if(timeLeft<roundTime*6)bar.className='progress-bar bg-warning';
+        if(timeLeft<=0){clearInterval(roundTimer);lives--;updateDisplay();nextRound();}
+    },100);
+}
+
+function checkAnswer(selected,target,btn){
+    clearInterval(roundTimer);
+    if(selected.hex===target.hex){
+        score+=10*level;level=Math.min(level+1,10);
+        btn.style.border='3px solid #4CAF50';btn.style.boxShadow='0 0 20px rgba(76,175,80,.5)';
+        if(level>3)roundTime=Math.max(2,5-level*0.3);
+    } else {
+        lives--;btn.style.border='3px solid #F44336';btn.style.boxShadow='0 0 20px rgba(244,67,54,.5)';
     }
+    updateDisplay();
+    setTimeout(()=>nextRound(),500);
+}
 
-    function nextRound() {
-        if (!gameActive) return;
-        
-        currentColor = colors[Math.floor(Math.random() * colors.length)];
-        const colorName = document.getElementById('color-name');
-        colorName.textContent = currentColor.name;
-        colorName.style.color = currentColor.hex;
-        
-        // Embaralhar cores
-        const shuffled = [...colors].sort(() => Math.random() - 0.5).slice(0, 3);
-        
-        const buttonsDiv = document.getElementById('color-buttons');
-        buttonsDiv.innerHTML = '';
-        
-        shuffled.forEach(color => {
-            const btn = document.createElement('button');
-            btn.className = 'color-btn';
-            btn.style.backgroundColor = color.hex;
-            btn.textContent = color.name;
-            btn.onclick = () => checkAnswer(color);
-            buttonsDiv.appendChild(btn);
-        });
-    }
+function endGame(){
+    gameActive=false;clearInterval(timer);clearInterval(roundTimer);
+    document.getElementById('gameArea').style.display='none';
+    document.getElementById('finalScore').textContent=score+' pts';
+    document.getElementById('finalLevel').textContent='Nível '+level;
+    document.getElementById('gameOver').classList.remove('d-none');
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Color Matching',score:score,time_spent:seconds})
+    });
+}
 
-    function checkAnswer(selected) {
-        if (!gameActive) return;
-        
-        if (selected.name === currentColor.name) {
-            score += 10;
-            document.getElementById('score').textContent = score;
-            nextRound();
-        }
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                endGame();
-            }
-        }, 1000);
-    }
-
-    function endGame() {
-        gameActive = false;
-        clearInterval(timerInterval);
-        document.getElementById('game-over-message').style.display = 'block';
-        document.getElementById('final-score').textContent = score;
-        document.querySelector('.btn-primary').disabled = false;
-        document.querySelector('.btn-primary').textContent = 'Jogar Novamente';
-    }
-
-    function submitScore() {
-        fetch('{% url "save_game_score" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                game_name: 'Color Matching',
-                score: score,
-                time_spent: 30
-            })
-        }).then(r => r.json()).then(d => {
-            alert('Score salvo!');
-        });
-    }
+function updateDisplay(){
+    document.getElementById('scoreDisplay').textContent='Pontos: '+score;
+    document.getElementById('livesDisplay').textContent='❤️ '+lives;
+    document.getElementById('levelDisplay').textContent='Nível '+level;
+}
+function formatTime(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+document.getElementById('gameArea').style.display='none';
 </script>
 {% endblock %}

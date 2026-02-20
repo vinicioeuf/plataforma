@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Identificar Emoções - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-emoji-smile"></i> Identificar Emoções</h1>
+            <p class="text-muted">Leia a situação e identifique a emoção correta.</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="badge bg-primary fs-6" id="scoreDisplay">Pontos: 0</span>
+            <span class="badge bg-info fs-6" id="progressDisplay">Pergunta 1/10</span>
+            <span class="badge bg-success fs-6" id="streakDisplay">🔥 0</span>
+        </div>
+        <div class="progress mt-2" style="height:6px;background:rgba(255,255,255,.1);">
+            <div id="progressBar" class="progress-bar bg-primary" style="width:0%;transition:width .3s ease;"></div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div id="questionCard" class="card p-4 mb-3 text-center">
+                <div id="scenarioEmoji" style="font-size:3.5rem;"></div>
+                <h4 id="scenario" class="fw-bold mt-3 mb-2"></h4>
+                <p id="scenarioDesc" class="text-muted"></p>
+            </div>
+            <div id="optionsArea" class="row g-2 mb-3"></div>
+            <div id="feedback" class="card p-3 text-center d-none">
+                <h5 id="feedbackText" class="fw-bold"></h5>
+                <p id="feedbackExplain" class="text-muted mb-0"></p>
+            </div>
+        </div>
+    </div>
+    <div id="gameComplete" class="card p-4 mt-3 text-center d-none" style="background:linear-gradient(135deg,rgba(156,39,176,.15),rgba(33,150,243,.15));border:2px solid rgba(156,39,176,.4);">
+        <h3>🎭 Quiz Completo!</h3>
+        <p class="fs-5" id="resultText"></p>
+        <div class="d-flex justify-content-center gap-3 mb-3">
+            <span class="badge bg-primary fs-5 p-2" id="finalScore">0 pts</span>
+            <span class="badge bg-success fs-5 p-2" id="finalCorrect">0/10 corretas</span>
+        </div>
+        <p id="badge" class="fs-4 fw-bold"></p>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <button class="btn btn-success" onclick="startGame()"><i class="bi bi-arrow-clockwise"></i> Jogar Novamente</button>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light">Menu</a>
+        </div>
+    </div>
+</div>
+<script>
+const SCENARIOS=[
+    {emoji:'😢',situation:'Ana recebeu a notícia de que não passou no vestibular.',desc:'Ela estudou muito durante meses.',answer:'Tristeza',options:['Tristeza','Raiva','Surpresa','Medo'],explain:'Frustração e tristeza são normais diante de um resultado negativo.'},
+    {emoji:'😡',situation:'Pedro descobriu que seu melhor amigo mentiu sobre algo importante.',desc:'Eles sempre confiaram um no outro.',answer:'Raiva',options:['Tristeza','Raiva','Nojo','Medo'],explain:'A sensação de traição naturalmente gera raiva e decepção.'},
+    {emoji:'😨',situation:'Maria ouviu um barulho estranho em casa tarde da noite.',desc:'Ela estava sozinha.',answer:'Medo',options:['Surpresa','Raiva','Medo','Tristeza'],explain:'Situações de vulnerabilidade e incerteza geram medo instintivo.'},
+    {emoji:'😲',situation:'João encontrou uma festa surpresa ao chegar em casa.',desc:'Ele não fazia ideia que era aniversário.',answer:'Surpresa',options:['Alegria','Surpresa','Medo','Raiva'],explain:'Eventos inesperados provocam surpresa, podendo ser positiva.'},
+    {emoji:'😊',situation:'Clara conseguiu a promoção que tanto queria no trabalho.',desc:'Ela trabalhou duro por dois anos.',answer:'Alegria',options:['Surpresa','Orgulho','Alegria','Alívio'],explain:'Conquistas importantes geram alegria e satisfação.'},
+    {emoji:'🤢',situation:'Lucas viu alguém maltratando um animal na rua.',desc:'O animal estava assustado e machucado.',answer:'Nojo',options:['Raiva','Nojo','Tristeza','Medo'],explain:'Comportamentos repulsivos geram nojo moral, uma rejeição instintiva.'},
+    {emoji:'😰',situation:'Sara precisa fazer uma apresentação para 200 pessoas amanhã.',desc:'É sua primeira vez falando em público.',answer:'Ansiedade',options:['Medo','Ansiedade','Tristeza','Raiva'],explain:'A antecipação de situações desafiadoras gera ansiedade.'},
+    {emoji:'😌',situation:'Rafael terminou todas as provas finais da faculdade.',desc:'Foram semanas muito intensas.',answer:'Alívio',options:['Alegria','Surpresa','Alívio','Orgulho'],explain:'Quando a pressão passa, sentimos alívio e relaxamento.'},
+    {emoji:'🥰',situation:'Juliana reencontrou sua avó depois de dois anos sem a ver.',desc:'Elas são muito próximas.',answer:'Amor',options:['Alegria','Amor','Saudade','Surpresa'],explain:'O reencontro com pessoas queridas evoca sentimentos de amor.'},
+    {emoji:'😤',situation:'Carlos ficou preso no trânsito por 3 horas e perdeu um compromisso.',desc:'Ele tinha um compromisso importante.',answer:'Frustração',options:['Raiva','Frustração','Tristeza','Ansiedade'],explain:'Quando não controlamos uma situação, sentimos frustração.'},
+    {emoji:'🤗',situation:'Bianca foi elogiada pelo chefe na frente de toda a equipe.',desc:'Ela não esperava reconhecimento público.',answer:'Orgulho',options:['Vergonha','Surpresa','Alegria','Orgulho'],explain:'O reconhecimento público gera orgulho e autoconfiança.'},
+    {emoji:'😔',situation:'André está se mudando e precisa deixar seus amigos de infância.',desc:'Eles cresceram juntos.',answer:'Saudade',options:['Tristeza','Saudade','Medo','Raiva'],explain:'A separação de pessoas queridas provoca saudade antecipada.'},
+];
+
+let currentQ=0,score=0,correct=0,streak=0,questions=[];
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function startGame(){
+    questions=shuffle([...SCENARIOS]).slice(0,10);
+    currentQ=0;score=0;correct=0;streak=0;
+    document.getElementById('gameComplete').classList.add('d-none');
+    showQuestion();
+}
+
+function showQuestion(){
+    if(currentQ>=questions.length)return endGame();
+    const q=questions[currentQ];
+    document.getElementById('scenarioEmoji').textContent=q.emoji;
+    document.getElementById('scenario').textContent=q.situation;
+    document.getElementById('scenarioDesc').textContent=q.desc;
+    document.getElementById('progressDisplay').textContent=`Pergunta ${currentQ+1}/${questions.length}`;
+    document.getElementById('progressBar').style.width=((currentQ)/questions.length*100)+'%';
+    document.getElementById('feedback').classList.add('d-none');
+    document.getElementById('questionCard').style.opacity='1';
+    
+    const area=document.getElementById('optionsArea');area.innerHTML='';
+    shuffle([...q.options]).forEach(opt=>{
+        const col=document.createElement('div');col.className='col-6';
+        const btn=document.createElement('button');
+        btn.className='btn btn-outline-light w-100 p-3 fs-6';btn.textContent=opt;
+        btn.addEventListener('click',()=>checkAnswer(opt,q,area));
+        col.appendChild(btn);area.appendChild(col);
+    });
+    updateDisplay();
+}
+
+function checkAnswer(selected,q,area){
+    area.querySelectorAll('button').forEach(b=>{
+        b.disabled=true;
+        if(b.textContent===q.answer)b.className='btn btn-success w-100 p-3 fs-6';
+        else if(b.textContent===selected&&selected!==q.answer)b.className='btn btn-danger w-100 p-3 fs-6';
+    });
+    const fb=document.getElementById('feedback');fb.classList.remove('d-none');
+    if(selected===q.answer){
+        correct++;streak++;score+=10+(streak>1?streak*2:0);
+        document.getElementById('feedbackText').textContent='✅ Correto!';
+        fb.style.borderColor='rgba(76,175,80,.5)';
+    } else {
+        streak=0;
+        document.getElementById('feedbackText').textContent='❌ Não era bem isso...';
+        fb.style.borderColor='rgba(244,67,54,.5)';
+    }
+    document.getElementById('feedbackExplain').textContent=q.explain;
+    updateDisplay();
+    setTimeout(()=>{currentQ++;showQuestion();},2500);
+}
+
+function endGame(){
+    document.getElementById('questionCard').style.opacity='0.3';
+    document.getElementById('optionsArea').innerHTML='';
+    const pct=correct/questions.length*100;
+    let badge='';
+    if(pct>=90)badge='🏆 Mestre das Emoções!';
+    else if(pct>=70)badge='🌟 Excelente percepção!';
+    else if(pct>=50)badge='👍 Bom trabalho!';
+    else badge='📚 Continue praticando!';
+    document.getElementById('finalScore').textContent=score+' pts';
+    document.getElementById('finalCorrect').textContent=correct+'/'+questions.length+' corretas';
+    document.getElementById('resultText').textContent=`Você acertou ${correct} de ${questions.length} perguntas!`;
+    document.getElementById('badge').textContent=badge;
+    document.getElementById('gameComplete').classList.remove('d-none');
+    document.getElementById('progressBar').style.width='100%';
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Emotion Identify',score:score,time_spent:0})
+    });
+}
+
+function updateDisplay(){
+    document.getElementById('scoreDisplay').textContent='Pontos: '+score;
+    document.getElementById('streakDisplay').textContent='🔥 '+streak;
+}
+
+startGame();
+</script>
+{% endblock %}

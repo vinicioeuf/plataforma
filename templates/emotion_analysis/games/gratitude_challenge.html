@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Desafio da Gratidão - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-heart"></i> Desafio da Gratidão</h1>
+            <p class="text-muted">Liste coisas pelas quais você é grato(a). ~3 minutos.</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div id="promptCard" class="card p-4 text-center mb-3">
+                <div id="promptEmoji" style="font-size:3rem;">🙏</div>
+                <h4 id="promptText" class="fw-bold mt-2">Pelo que você é grato(a) hoje?</h4>
+                <p id="promptHint" class="text-muted">Pense em algo pequeno ou grande que trouxe alegria</p>
+            </div>
+            <div class="card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary fs-6" id="countDisplay">0/5 gratidões</span>
+                    <span class="badge bg-info fs-6" id="timerDisplay">⏱️ 3:00</span>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" id="gratitudeInput" class="form-control form-control-lg" placeholder="Sou grato(a) por..." maxlength="200" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+                    <button class="btn btn-success" id="addBtn" onclick="addGratitude()"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <div id="gratitudeList" class="d-flex flex-column gap-2"></div>
+            </div>
+            <div id="completeCard" class="card p-4 text-center d-none" style="background:linear-gradient(135deg,rgba(233,30,99,.15),rgba(255,193,7,.15));border:2px solid rgba(233,30,99,.4);">
+                <h3>🌟 Maravilhoso!</h3>
+                <p class="fs-5">Você listou <span id="totalCount" class="fw-bold">0</span> gratidões!</p>
+                <p class="text-muted">A gratidão fortalece sua saúde mental e emocional.</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <span class="badge bg-primary fs-5 p-2" id="finalScore">0 pts</span>
+                </div>
+                <div id="savedEntries" class="mb-3"></div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-success" onclick="saveAndRestart()"><i class="bi bi-arrow-clockwise"></i> Novamente</button>
+                    <a href="{% url 'games_menu' %}" class="btn btn-outline-light">Menu</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const PROMPTS=[
+    {emoji:'🏠',text:'Uma pessoa da sua vida',hint:'Família, amigo, professor, colega...'},
+    {emoji:'🌅',text:'Algo na natureza',hint:'O sol, uma flor, o som da chuva...'},
+    {emoji:'💪',text:'Uma habilidade sua',hint:'Algo que você sabe fazer bem'},
+    {emoji:'🎵',text:'Algo que te faz sorrir',hint:'Uma música, lembrança, lugar...'},
+    {emoji:'🍞',text:'Algo básico que tem valor',hint:'Saúde, comida, teto, educação...'},
+    {emoji:'⭐',text:'Uma conquista recente',hint:'Pequena ou grande, todas contam!'},
+    {emoji:'🤝',text:'Uma gentileza que recebeu',hint:'Alguém que ajudou você'},
+    {emoji:'📚',text:'Algo que aprendeu',hint:'Uma lição, experiência ou conhecimento'},
+];
+
+let gratitudes=[],promptIdx=0,timer=null,seconds=180,score=0,prompts;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function init(){
+    gratitudes=[];promptIdx=0;seconds=180;score=0;
+    prompts=shuffle([...PROMPTS]);
+    document.getElementById('gratitudeList').innerHTML='';
+    document.getElementById('completeCard').classList.add('d-none');
+    document.getElementById('gratitudeInput').disabled=false;
+    document.getElementById('addBtn').disabled=false;
+    updatePrompt();updateDisplay();
+    clearInterval(timer);
+    timer=setInterval(()=>{
+        seconds--;
+        document.getElementById('timerDisplay').textContent='⏱️ '+formatTime(seconds);
+        if(seconds<=0)complete();
+    },1000);
+    document.getElementById('gratitudeInput').focus();
+}
+
+function updatePrompt(){
+    if(promptIdx<prompts.length){
+        const p=prompts[promptIdx];
+        document.getElementById('promptEmoji').textContent=p.emoji;
+        document.getElementById('promptText').textContent=p.text;
+        document.getElementById('promptHint').textContent=p.hint;
+    } else {
+        document.getElementById('promptEmoji').textContent='✨';
+        document.getElementById('promptText').textContent='Continue listando!';
+        document.getElementById('promptHint').textContent='Qualquer coisa pela qual você é grato(a)';
+    }
+}
+
+function addGratitude(){
+    const input=document.getElementById('gratitudeInput');
+    const text=input.value.trim();
+    if(!text)return;
+    gratitudes.push(text);promptIdx++;score+=20;
+    
+    const item=document.createElement('div');
+    item.className='gratitude-item p-2 px-3 d-flex align-items-center gap-2';
+    item.style.cssText='background:rgba(233,30,99,.1);border-radius:12px;border:1px solid rgba(233,30,99,.2);animation:slideIn .3s ease;';
+    item.innerHTML=`<span style="font-size:1.3rem;">💝</span><span>${text}</span>`;
+    document.getElementById('gratitudeList').prepend(item);
+    
+    input.value='';input.focus();
+    updatePrompt();updateDisplay();
+    
+    if(gratitudes.length>=5)document.getElementById('promptCard').style.borderColor='rgba(76,175,80,.5)';
+}
+
+function complete(){
+    clearInterval(timer);
+    document.getElementById('gratitudeInput').disabled=true;
+    document.getElementById('addBtn').disabled=true;
+    if(gratitudes.length>=5)score+=50;
+    document.getElementById('totalCount').textContent=gratitudes.length;
+    document.getElementById('finalScore').textContent=score+' pts';
+    document.getElementById('completeCard').classList.remove('d-none');
+    
+    // Save as journal entry
+    const content='🙏 Gratidões do dia:\n'+gratitudes.map((g,i)=>`${i+1}. ${g}`).join('\n');
+    fetch('{% url "save_journal_entry" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({content:content,mood_rating:4,visibility:'private',entry_type:'text'})
+    });
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Gratitude Challenge',score:score,time_spent:180-seconds})
+    });
+}
+
+function saveAndRestart(){init();}
+
+function updateDisplay(){
+    document.getElementById('countDisplay').textContent=gratitudes.length+'/5 gratidões';
+}
+function formatTime(s){const m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60);}
+
+document.getElementById('gratitudeInput').addEventListener('keypress',e=>{if(e.key==='Enter')addGratitude();});
+
+init();
+</script>
+<style>
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+</style>
+{% endblock %}

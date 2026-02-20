@@ -61,103 +61,50 @@
     </div>
 
     <!-- Cartões de estatísticas -->
-    <div class="row g-4 mb-4">
+    <div class="row g-3 mb-4">
         {% if profile.user_type == 'professional' %}
-            <!-- Estatísticas para profissionais -->
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1">Consultas hoje</p>
-                                <h2 class="fw-bold mb-0">{{ consultations_today }}</h2>
-                            </div>
-                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                                <i class="bi bi-calendar-check"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ consultations_today }}</h3><small class="text-muted">Consultas Hoje</small></div>
             </div>
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1">Total de pacientes</p>
-                                <h2 class="fw-bold mb-0">{{ total_patients }}</h2>
-                            </div>
-                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                                <i class="bi bi-people"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_patients }}</h3><small class="text-muted">Pacientes</small></div>
             </div>
         {% else %}
-            <!-- Estatísticas para pacientes -->
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1">Gravações totais</p>
-                                <h2 class="fw-bold mb-0">{{ total_recordings }}</h2>
-                            </div>
-                            <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                                <i class="bi bi-mic-fill"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_recordings }}</h3><small class="text-muted">Gravações</small></div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_games }}</h3><small class="text-muted">Jogos</small></div>
             </div>
         {% endif %}
-        
-        <!-- Cartões comuns -->
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">Análises concluídas</p>
-                            <h2 class="fw-bold mb-0">{{ analysis_total }}</h2>
-                        </div>
-                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                            <i class="bi bi-bar-chart-line"></i>
-                        </span>
-                    </div>
-                    <p class="small text-muted mt-3 mb-0">Integre análises para enriquecer os resultados.</p>
-                </div>
-            </div>
+        <div class="col-6 col-md-3">
+            <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ analysis_total }}</h3><small class="text-muted">Análises</small></div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1">{% if profile.user_type == 'professional' %}Última consulta{% else %}Jogos jogados{% endif %}</p>
-                            <h2 class="fw-bold mb-0">{% if profile.user_type == 'professional' %}{{ recent_consultations|length }}{% else %}{{ recent_games|length }}{% endif %}</h2>
-                        </div>
-                        <span class="feature-icon" style="width: 52px; height: 52px; font-size: 1.4rem;">
-                            {% if profile.user_type == 'professional' %}
-                                <i class="bi bi-calendar2-heart"></i>
-                            {% else %}
-                                <i class="bi bi-controller"></i>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <p class="small text-muted mt-3 mb-0">
-                        {% if profile.user_type == 'professional' %}
-                            Acompanhe sua agenda de consultas.
-                        {% else %}
-                            Relaxe com nossos jogos terapêuticos.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
+        <div class="col-6 col-md-3">
+            <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ friends_count }}</h3><small class="text-muted">Amigos</small></div>
         </div>
     </div>
+
+    {% if user_achievements %}
+    <div class="card p-3 mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-trophy text-warning"></i>
+            <strong>Conquistas ({{ user_achievements|length }}/{{ total_achievements }})</strong>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {% for a in user_achievements %}
+            <span class="badge" style="background:rgba(255,193,7,.15);color:#ffc107;padding:6px 10px;">🏆 {{ a.get_achievement_type_display }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pending_requests %}
+    <div class="alert" style="background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.3);border-radius:12px;" role="alert">
+        <i class="bi bi-person-raised-hand"></i> Você tem <strong>{{ pending_requests }}</strong> solicitação(ões) de amizade pendente(s).
+        <a href="{% url 'friends_list' %}" class="alert-link">Ver agora</a>
+    </div>
+    {% endif %}
 
     <!-- Seção de Ações Rápidas -->
     <section class="quick-actions-section mt-4">
@@ -175,7 +122,7 @@
             </div>
             <div class="quick-actions-grid mt-4">
                 {% if profile.user_type == 'professional' %}
-                    <button type="button" class="quick-action-card primary" data-url="{% url 'consultations' %}">
+                    <a href="{% url 'consultations' %}" class="quick-action-card primary">
                         <span class="quick-action-icon">
                             <i class="bi bi-calendar-check"></i>
                         </span>
@@ -184,8 +131,8 @@
                             <small>Confirme consultas e acompanhe pacientes.</small>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'history' %}">
+                    </a>
+                    <a href="{% url 'history' %}" class="quick-action-card">
                         <span class="quick-action-icon alt">
                             <i class="bi bi-people"></i>
                         </span>
@@ -194,8 +141,8 @@
                             <small>Revise registros e histórico emocional.</small>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'record_audio' %}">
+                    </a>
+                    <a href="{% url 'record_audio' %}" class="quick-action-card">
                         <span class="quick-action-icon alt">
                             <i class="bi bi-mic"></i>
                         </span>
@@ -204,8 +151,8 @@
                             <small>Capture sinais de voz do paciente.</small>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'profile_setup' %}">
+                    </a>
+                    <a href="{% url 'profile_setup' %}" class="quick-action-card">
                         <span class="quick-action-icon alt">
                             <i class="bi bi-gear"></i>
                         </span>
@@ -214,48 +161,48 @@
                             <small>Atualize especialidades e horários.</small>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
+                    </a>
                 {% else %}
-                    <button type="button" class="quick-action-card primary" data-url="{% url 'record_audio' %}">
-                        <span class="quick-action-icon">
-                            <i class="bi bi-mic"></i>
-                        </span>
-                        <div class="quick-action-content">
-                            <strong>Nova gravação</strong>
-                            <small>Registre sua voz e acompanhe emoções.</small>
-                        </div>
+                    <a href="{% url 'record_audio' %}" class="quick-action-card primary">
+                        <span class="quick-action-icon"><i class="bi bi-mic"></i></span>
+                        <div class="quick-action-content"><strong>Nova gravação</strong><small>Registre sua voz e acompanhe emoções.</small></div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'games_menu' %}">
-                        <span class="quick-action-icon alt">
-                            <i class="bi bi-controller"></i>
-                        </span>
-                        <div class="quick-action-content">
-                            <strong>Relaxar e jogar</strong>
-                            <small>Três experiências rápidas para acalmar.</small>
-                        </div>
+                    </a>
+                    <a href="{% url 'games_menu' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-controller"></i></span>
+                        <div class="quick-action-content"><strong>Jogos Terapêuticos</strong><small>6 experiências para equilibrar emoções.</small></div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'consultations' %}">
-                        <span class="quick-action-icon alt">
-                            <i class="bi bi-chat-heart"></i>
-                        </span>
-                        <div class="quick-action-content">
-                            <strong>Consultas</strong>
-                            <small>Agende ou acompanhe seu cuidado.</small>
-                        </div>
+                    </a>
+                    <a href="{% url 'journal_feed' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-journal-text"></i></span>
+                        <div class="quick-action-content"><strong>Confessionário</strong><small>Desabafe e conecte-se.</small></div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
-                    <button type="button" class="quick-action-card" data-url="{% url 'history' %}">
-                        <span class="quick-action-icon alt">
-                            <i class="bi bi-clock-history"></i>
-                        </span>
-                        <div class="quick-action-content">
-                            <strong>Histórico completo</strong>
-                            <small>Reviva suas análises e registros.</small>
-                        </div>
+                    </a>
+                    <a href="{% url 'friends_list' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-people"></i></span>
+                        <div class="quick-action-content"><strong>Amigos</strong><small>Chat privado e conexões.</small></div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </button>
+                    </a>
+                    <a href="{% url 'support_groups' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-people-fill"></i></span>
+                        <div class="quick-action-content"><strong>Grupos de Apoio</strong><small>Comunidade e acolhimento.</small></div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    <a href="{% url 'consultations' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-chat-heart"></i></span>
+                        <div class="quick-action-content"><strong>Consultas</strong><small>Agende ou acompanhe.</small></div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    <a href="{% url 'history' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-clock-history"></i></span>
+                        <div class="quick-action-content"><strong>Histórico</strong><small>Análises e registros.</small></div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    <a href="{% url 'profile_setup' %}" class="quick-action-card">
+                        <span class="quick-action-icon alt"><i class="bi bi-gear"></i></span>
+                        <div class="quick-action-content"><strong>Perfil</strong><small>Configurações pessoais.</small></div>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
                 {% endif %}
             </div>
         </div>
@@ -338,46 +285,55 @@
                     <h5 class="fw-bold mb-3">
                         <i class="bi bi-journal-heart"></i> Confessionário Virtual
                     </h5>
-                    <p class="text-muted small mb-3">Um espaço seguro para você desabafar e registrar seus sentimentos do dia.</p>
+                    <p class="text-muted small mb-3">Um espaço seguro para desabafar e registrar seus sentimentos.</p>
                     
                     <form id="daily-journal" class="mb-3">
                         {% csrf_token %}
                         <textarea 
                             class="form-control" 
-                            rows="4" 
-                            placeholder="Como você está se sentindo hoje? Conte aqui seus pensamentos, medos, alegrias... Este é seu espaço privado."
+                            rows="3" 
+                            placeholder="Como você está se sentindo hoje?..."
                             id="journal-content"
                             style="border: none; background: rgba(0,0,0,0.05); resize: none;"
                         ></textarea>
                         <div class="d-flex justify-content-between align-items-center mt-2">
-                            <small class="text-muted">📝 Suas palavras ficam só com você</small>
+                            <small class="text-muted">🔒 Privado</small>
                             <button type="button" class="btn btn-primary btn-sm" onclick="saveJournalEntry(this)">
                                 <i class="bi bi-heart"></i> Salvar
                             </button>
                         </div>
                     </form>
                     
+                    <a href="{% url 'journal_feed' %}" class="btn btn-outline-primary btn-sm w-100 mb-3">
+                        <i class="bi bi-journal-text"></i> Ver Confessionário Completo
+                    </a>
+
+                    {% if recent_journal %}
+                    <h6 class="mt-2 small text-muted">Entradas recentes</h6>
+                    {% for entry in recent_journal %}
+                    <div class="p-2 mb-1" style="background:rgba(0,0,0,.03);border-radius:8px;">
+                        <small>{{ entry.content|truncatechars:60 }}</small>
+                        <small class="text-muted d-block">{{ entry.created_at|timesince }} atrás</small>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
                     {% if next_consultation %}
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading">Próxima consulta</h6>
-                            <p class="mb-0">{{ next_consultation.scheduled_datetime|date:'d/m/Y H:i' }}</p>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <h6 class="alert-heading mb-1">📅 Próxima consulta</h6>
+                            <p class="mb-0 small">{{ next_consultation.scheduled_datetime|date:'d/m/Y H:i' }}</p>
                             <small>Dr(a). {{ next_consultation.professional.get_full_name|default:next_consultation.professional.username }}</small>
                         </div>
                     {% endif %}
                     
                     {% if recent_games %}
-                        <h6 class="mt-3">Atividades recentes</h6>
+                        <h6 class="mt-3 small text-muted">Jogos recentes</h6>
                         {% for game in recent_games %}
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="small">{{ game.game_name }}</span>
                                 <span class="badge bg-success">{{ game.score }}</span>
                             </div>
                         {% endfor %}
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="bi bi-controller text-muted" style="font-size: 24px;"></i>
-                            <p class="small text-muted mt-2">Experimente nossos jogos relaxantes!</p>
-                        </div>
                     {% endif %}
                     
                     <a href="{% url 'games_menu' %}" class="btn btn-success w-100 mt-3">
@@ -423,17 +379,6 @@
     
     <!-- Script para o confessionário virtual -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.quick-action-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const target = card.dataset.url;
-                    if (target) {
-                        window.location.href = target;
-                    }
-                });
-            });
-        });
-
         function saveJournalEntry(buttonRef) {
             const content = document.getElementById('journal-content').value.trim();
             if (!content) {

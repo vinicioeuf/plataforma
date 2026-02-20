@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}{{ group.emoji }} {{ group.name }} - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{% url 'support_groups' %}" class="btn btn-sm btn-outline-light"><i class="bi bi-arrow-left"></i></a>
+                        <span style="font-size:1.8rem;">{{ group.emoji }}</span>
+                        <div>
+                            <strong>{{ group.name }}</strong>
+                            <small class="text-muted d-block">{{ group.members.count }} membros</small>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="anonSwitch">
+                        <label class="form-check-label small" for="anonSwitch">Anônimo</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card" style="height:60vh;display:flex;flex-direction:column;">
+                <div id="chatMessages" class="flex-grow-1 p-3" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+                    {% for msg in group_messages %}
+                    <div class="chat-msg {% if msg.sender == request.user %}mine{% else %}theirs{% endif %}">
+                        <small class="chat-sender">
+                            {% if msg.is_anonymous %}Anônimo{% else %}{{ msg.sender.get_full_name|default:msg.sender.username }}{% endif %}
+                        </small>
+                        <div class="chat-bubble">{{ msg.content }}</div>
+                        <small class="chat-time">{{ msg.created_at|date:"H:i" }}</small>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted my-auto">
+                        <div style="font-size:3rem;">{{ group.emoji }}</div>
+                        <p class="mt-2">Seja o primeiro a enviar uma mensagem!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="p-3" style="border-top:1px solid rgba(255,255,255,.1);">
+                    <div class="d-flex gap-2">
+                        <input type="text" id="msgInput" class="form-control" placeholder="Mensagem para o grupo..." autocomplete="off" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+                        <button id="sendBtn" class="btn btn-primary"><i class="bi bi-send"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.chat-msg{display:flex;flex-direction:column;max-width:75%;}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end;}
+.chat-msg.theirs{align-self:flex-start;align-items:flex-start;}
+.chat-bubble{padding:10px 16px;border-radius:18px;word-break:break-word;line-height:1.4;}
+.chat-msg.mine .chat-bubble{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border-bottom-right-radius:4px;}
+.chat-msg.theirs .chat-bubble{background:rgba(255,255,255,.1);color:white;border-bottom-left-radius:4px;}
+.chat-time{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px;padding:0 8px;}
+.chat-sender{font-size:.75rem;color:rgba(255,255,255,.5);padding:0 8px;margin-bottom:2px;}
+</style>
+<script>
+const groupId={{ group.id }};
+const csrfToken='{{ csrf_token }}';
+const container=document.getElementById('chatMessages');
+const input=document.getElementById('msgInput');
+
+function scrollToBottom(){container.scrollTop=container.scrollHeight;}
+scrollToBottom();
+
+function sendMessage(){
+    const content=input.value.trim();
+    if(!content)return;
+    const isAnon=document.getElementById('anonSwitch').checked;
+    input.value='';
+    
+    const div=document.createElement('div');div.className='chat-msg mine';
+    div.innerHTML=`<small class="chat-sender">${isAnon?'Anônimo':'Você'}</small><div class="chat-bubble">${content}</div><small class="chat-time">${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small>`;
+    container.appendChild(div);scrollToBottom();
+    
+    fetch(`/groups/${groupId}/send/`,{
+        method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},
+        body:JSON.stringify({content:content,is_anonymous:isAnon})
+    }).then(r=>r.json()).then(d=>{
+        if(!d.success)alert(d.error||'Erro ao enviar');
+    });
+}
+
+document.getElementById('sendBtn').addEventListener('click',sendMessage);
+input.addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage();});
+</script>
+{% endblock %}

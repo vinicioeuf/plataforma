@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Amigos - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="page-heading"><i class="bi bi-people"></i> Amigos</h1>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card p-3 mb-4">
+        <form method="GET" class="d-flex gap-2">
+            <input type="text" name="q" class="form-control" placeholder="Buscar usuários por nome..." value="{{ search_query }}" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    {% if search_results %}
+    <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-search"></i> Resultados da Busca</h5>
+        {% for user in search_results %}
+        <div class="d-flex justify-content-between align-items-center p-2 mb-2" style="background:rgba(255,255,255,.05);border-radius:10px;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle">{{ user.username|first|upper }}</div>
+                <div>
+                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                    <small class="text-muted d-block">@{{ user.username }}</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary friend-request-btn" data-user-id="{{ user.id }}">
+                <i class="bi bi-person-plus"></i> Adicionar
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pending Requests Received -->
+    {% if pending_received %}
+    <div class="card p-4 mb-4" style="border-left:4px solid var(--primary);">
+        <h5 class="fw-bold mb-3"><i class="bi bi-person-raised-hand"></i> Solicitações Recebidas ({{ pending_received|length }})</h5>
+        {% for fr in pending_received %}
+        <div class="d-flex justify-content-between align-items-center p-2 mb-2" style="background:rgba(255,255,255,.05);border-radius:10px;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle">{{ fr.sender.username|first|upper }}</div>
+                <div>
+                    <strong>{{ fr.sender.get_full_name|default:fr.sender.username }}</strong>
+                    <small class="text-muted d-block">@{{ fr.sender.username }}</small>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-success respond-btn" data-id="{{ fr.id }}" data-action="accept">
+                    <i class="bi bi-check-lg"></i> Aceitar
+                </button>
+                <button class="btn btn-sm btn-outline-danger respond-btn" data-id="{{ fr.id }}" data-action="reject">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pending Sent -->
+    {% if pending_sent %}
+    <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-send"></i> Enviadas ({{ pending_sent|length }})</h5>
+        {% for fr in pending_sent %}
+        <div class="d-flex justify-content-between align-items-center p-2 mb-2" style="background:rgba(255,255,255,.05);border-radius:10px;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle">{{ fr.receiver.username|first|upper }}</div>
+                <strong>{{ fr.receiver.get_full_name|default:fr.receiver.username }}</strong>
+            </div>
+            <span class="badge bg-secondary">Pendente</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Friends List -->
+    <div class="card p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-people-fill"></i> Seus Amigos ({{ friends|length }})</h5>
+        {% if friends %}
+        <div class="row g-3">
+            {% for friend in friends %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 h-100" style="background:rgba(255,255,255,.05);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="avatar-circle position-relative">
+                            {{ friend.username|first|upper }}
+                        </div>
+                        <div>
+                            <strong>{{ friend.get_full_name|default:friend.username }}</strong>
+                            <small class="text-muted d-block">@{{ friend.username }}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="{% url 'chat_view' friend.id %}" class="btn btn-sm btn-primary flex-fill">
+                            <i class="bi bi-chat-dots"></i> Chat
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger block-btn" data-user-id="{{ friend.id }}">
+                            <i class="bi bi-slash-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <div style="font-size:3rem;">👋</div>
+            <p class="text-muted mt-2">Você ainda não tem amigos. Use a busca acima para encontrar pessoas!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<style>
+.avatar-circle{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:1.1rem;flex-shrink:0;}
+</style>
+<script>
+document.querySelectorAll('.friend-request-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const uid=this.dataset.userId;
+        fetch(`/friends/request/${uid}/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+        .then(r=>r.json()).then(d=>{
+            if(d.success){this.textContent='✓ Enviado';this.disabled=true;this.className='btn btn-sm btn-success';}
+            else alert(d.error||'Erro');
+        });
+    });
+});
+document.querySelectorAll('.respond-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const id=this.dataset.id,action=this.dataset.action;
+        const formData=new FormData();formData.append('action',action);
+        fetch(`/friends/respond/${id}/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'},body:formData})
+        .then(r=>r.json()).then(d=>{
+            if(d.success)location.reload();
+            else alert(d.error||'Erro');
+        });
+    });
+});
+document.querySelectorAll('.block-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        if(!confirm('Tem certeza que deseja bloquear?'))return;
+        const uid=this.dataset.userId;
+        fetch(`/friends/block/${uid}/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+        .then(r=>r.json()).then(d=>{if(d.success)location.reload();});
+    });
+});
+</script>
+{% endblock %}

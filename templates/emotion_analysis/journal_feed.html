@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Confessionário - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="page-heading"><i class="bi bi-journal-text"></i> Confessionário Virtual</h1>
+            <p class="text-muted">Um espaço seguro para desabafar e se conectar.</p>
+        </div>
+    </div>
+    <div class="row">
+        <!-- New Entry Form -->
+        <div class="col-lg-4 mb-4">
+            <div class="card p-4 sticky-top" style="top:90px;">
+                <h5 class="fw-bold mb-3"><i class="bi bi-pen"></i> Novo Desabafo</h5>
+                <div class="mb-3">
+                    <textarea id="entryContent" class="form-control" rows="5" placeholder="O que está no seu coração?..." maxlength="2000" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;resize:none;"></textarea>
+                    <small class="text-muted" id="charCount">0/2000</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Como você se sente? (1-5)</label>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-light mood-btn" data-mood="1">😢</button>
+                        <button class="btn btn-outline-light mood-btn" data-mood="2">😔</button>
+                        <button class="btn btn-outline-light mood-btn" data-mood="3">😐</button>
+                        <button class="btn btn-outline-light mood-btn" data-mood="4">😊</button>
+                        <button class="btn btn-outline-light mood-btn" data-mood="5">😄</button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Visibilidade</label>
+                    <select id="visibility" class="form-select" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
+                        <option value="private">🔒 Privado (só você)</option>
+                        <option value="friends">👥 Amigos</option>
+                        <option value="public">🌐 Público</option>
+                        <option value="anonymous">🎭 Anônimo (público, sem nome)</option>
+                    </select>
+                </div>
+                <button id="submitBtn" class="btn btn-primary w-100" onclick="submitEntry()">
+                    <i class="bi bi-send"></i> Publicar
+                </button>
+                <div id="successMsg" class="alert alert-success mt-2 d-none small text-center">Salvo com segurança! 💝</div>
+            </div>
+        </div>
+        
+        <!-- Feed -->
+        <div class="col-lg-8">
+            {% for entry in entries %}
+            <div class="card p-4 mb-3 journal-entry" style="animation:fadeInUp .4s ease {{ forloop.counter0|add:'0' }}s both;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        {% if entry.visibility == 'anonymous' %}
+                        <div class="avatar-sm">🎭</div>
+                        <div>
+                            <strong>Anônimo</strong>
+                            <small class="text-muted d-block">{{ entry.created_at|timesince }} atrás</small>
+                        </div>
+                        {% else %}
+                        <div class="avatar-sm">{{ entry.user.username|first|upper }}</div>
+                        <div>
+                            <strong>{% if entry.user == request.user %}Você{% else %}{{ entry.user.get_full_name|default:entry.user.username }}{% endif %}</strong>
+                            <small class="text-muted d-block">{{ entry.created_at|timesince }} atrás</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if entry.mood_rating %}
+                    <span class="badge" style="background:rgba(255,255,255,.1);">
+                        {% if entry.mood_rating == 1 %}😢{% elif entry.mood_rating == 2 %}😔{% elif entry.mood_rating == 3 %}😐{% elif entry.mood_rating == 4 %}😊{% else %}😄{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="mb-2" style="white-space:pre-wrap;line-height:1.6;">{{ entry.content }}</p>
+                {% if entry.entry_type == 'audio' %}
+                <div class="badge bg-info mb-2"><i class="bi bi-mic"></i> Áudio</div>
+                {% endif %}
+                <div class="d-flex align-items-center gap-3 mt-2" style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
+                    <button class="btn btn-sm {% if entry.id in user_likes %}btn-danger{% else %}btn-outline-danger{% endif %} like-btn" data-entry-id="{{ entry.id }}">
+                        <i class="bi bi-heart{% if entry.id in user_likes %}-fill{% endif %}"></i>
+                        <span class="like-count">{{ entry.likes_count }}</span>
+                    </button>
+                    <small class="text-muted">
+                        {% if entry.visibility == 'private' %}🔒 Privado
+                        {% elif entry.visibility == 'friends' %}👥 Amigos
+                        {% elif entry.visibility == 'anonymous' %}🎭 Anônimo
+                        {% else %}🌐 Público{% endif %}
+                    </small>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <div style="font-size:4rem;">📝</div>
+                <h4 class="mt-3">Nenhum desabafo ainda</h4>
+                <p class="text-muted">Seja o primeiro a compartilhar algo!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+.avatar-sm{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:.9rem;flex-shrink:0;}
+.mood-btn{min-width:44px;font-size:1.3rem;padding:4px 8px;transition:all .2s ease;}
+.mood-btn.active{background:var(--primary);border-color:var(--primary);transform:scale(1.15);}
+.journal-entry{transition:transform .2s ease;}
+.journal-entry:hover{transform:translateX(4px);}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+</style>
+<script>
+let selectedMood=3;
+document.querySelectorAll('.mood-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');selectedMood=parseInt(this.dataset.mood);
+    });
+});
+document.getElementById('entryContent').addEventListener('input',function(){
+    document.getElementById('charCount').textContent=this.value.length+'/2000';
+});
+
+function submitEntry(){
+    const content=document.getElementById('entryContent').value.trim();
+    if(!content){alert('Escreva algo para publicar.');return;}
+    const visibility=document.getElementById('visibility').value;
+    document.getElementById('submitBtn').disabled=true;
+    
+    fetch('{% url "save_journal_entry" %}',{
+        method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({content:content,mood_rating:selectedMood,visibility:visibility,entry_type:'text'})
+    }).then(r=>r.json()).then(d=>{
+        document.getElementById('submitBtn').disabled=false;
+        if(d.success){
+            document.getElementById('entryContent').value='';
+            document.getElementById('charCount').textContent='0/2000';
+            const msg=document.getElementById('successMsg');
+            msg.classList.remove('d-none');
+            setTimeout(()=>msg.classList.add('d-none'),3000);
+            setTimeout(()=>location.reload(),1000);
+        } else alert(d.error||'Erro ao salvar');
+    });
+}
+
+document.querySelectorAll('.like-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const eid=this.dataset.entryId;
+        fetch(`/journal/like/${eid}/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+        .then(r=>r.json()).then(d=>{
+            if(d.success){
+                this.querySelector('.like-count').textContent=d.likes_count;
+                const icon=this.querySelector('i');
+                if(d.liked){this.className='btn btn-sm btn-danger like-btn';icon.className='bi bi-heart-fill';}
+                else{this.className='btn btn-sm btn-outline-danger like-btn';icon.className='bi bi-heart';}
+                this.dataset.entryId=eid;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

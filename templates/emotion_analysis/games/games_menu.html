@@ -1,86 +1,107 @@
 {% extends 'base.html' %}
-
-{% block title %}Jogos - Plataforma de Saúde Mental{% endblock %}
-
+{% block title %}Jogos Terapêuticos - EmotionAI{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<div class="container pb-5">
     <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-4">🎮 Jogos para Bem-estar</h1>
-            <p class="text-muted">Distraia sua mente com estes jogos simples e relaxantes</p>
+        <div class="col-12">
+            <h1 class="page-heading"><i class="bi bi-controller"></i> Jogos Terapêuticos</h1>
+            <p class="page-subtitle">Experiências curtas de 3-5 minutos para equilibrar suas emoções.</p>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-body text-center">
-                    <div class="mb-3" style="font-size: 3rem;">🧠</div>
-                    <h5 class="card-title">Jogo da Memória</h5>
-                    <p class="card-text text-muted">Teste sua memória encontrando pares de cartas</p>
-                    <a href="{% url 'memory_game' %}" class="btn btn-primary">Jogar</a>
-                </div>
+    <div class="row mb-4 g-3">
+        <div class="col-md-4"><div class="card p-3 text-center"><h3 class="fw-bold mb-1">{{ total_games }}</h3><small class="text-muted">Jogos Completados</small></div></div>
+        <div class="col-md-4"><div class="card p-3 text-center"><h3 class="fw-bold mb-1">{{ achievements|length }}</h3><small class="text-muted">Conquistas</small></div></div>
+        <div class="col-md-4"><div class="card p-3 text-center"><h3 class="fw-bold mb-1">🔥</h3><small class="text-muted">Continue jogando!</small></div></div>
+    </div>
+    {% if achievements %}
+    <div class="card p-4 mb-4" style="background:rgba(13,18,40,0.85);color:white;">
+        <h5 class="fw-bold mb-3"><i class="bi bi-trophy"></i> Suas Conquistas</h5>
+        <div class="d-flex flex-wrap gap-3">
+            {% for a in achievements %}
+            <div class="text-center p-2" style="background:rgba(255,255,255,0.1);border-radius:12px;min-width:90px;">
+                <div style="font-size:1.5rem;">🏆</div>
+                <small>{{ a.get_achievement_type_display }}</small>
             </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-body text-center">
-                    <div class="mb-3" style="font-size: 3rem;">🫁</div>
-                    <h5 class="card-title">Exercício de Respiração</h5>
-                    <p class="card-text text-muted">Exercício guiado de respiração para relaxamento</p>
-                    <a href="{% url 'breathing_exercise' %}" class="btn btn-primary">Começar</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-body text-center">
-                    <div class="mb-3" style="font-size: 3rem;">🎨</div>
-                    <h5 class="card-title">Jogo de Cores</h5>
-                    <p class="card-text text-muted">Combine cores rapidamente para pontuar</p>
-                    <a href="{% url 'color_matching_game' %}" class="btn btn-primary">Jogar</a>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
-
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-4">📊 Seus Melhores Scores</h3>
+    {% endif %}
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="{% url 'memory_game' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">🧠</div>
+                    <h5 class="fw-bold mt-2">Jogo da Memória</h5>
+                    <p class="text-muted small">Foque no momento presente</p>
+                    <span class="badge bg-primary">~3 min</span>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'breathing_exercise' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">🫁</div>
+                    <h5 class="fw-bold mt-2">Respiração Guiada</h5>
+                    <p class="text-muted small">Acalme e regule emoções</p>
+                    <span class="badge bg-success">~5 min</span>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'color_matching_game' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">🎨</div>
+                    <h5 class="fw-bold mt-2">Jogo de Cores</h5>
+                    <p class="text-muted small">Combine cores rapidamente</p>
+                    <span class="badge bg-warning text-dark">~3 min</span>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'emotion_identify_game' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">🎭</div>
+                    <h5 class="fw-bold mt-2">Identificar Emoções</h5>
+                    <p class="text-muted small">Reconheça diferentes emoções</p>
+                    <span class="badge bg-info">~4 min</span>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'gratitude_challenge' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">🙏</div>
+                    <h5 class="fw-bold mt-2">Desafio da Gratidão</h5>
+                    <p class="text-muted small">Cultive gratidão diária</p>
+                    <span class="badge bg-success">~3 min</span>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'reflection_game' %}" class="text-decoration-none">
+                <div class="card game-card h-100"><div class="card-body text-center p-4">
+                    <div style="font-size:3.5rem;">💭</div>
+                    <h5 class="fw-bold mt-2">Reflexão Adaptativa</h5>
+                    <p class="text-muted small">Perguntas adaptadas ao seu humor</p>
+                    <span class="badge bg-secondary">~5 min</span>
+                </div></div>
+            </a>
         </div>
     </div>
-
-    <div class="row">
+    {% if top_games %}
+    <div class="card p-4 mt-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart"></i> Melhores Resultados</h5>
         {% for game in top_games %}
-        <div class="col-md-6 mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">{{ game.game_name }}</h6>
-                    <p class="mb-0">
-                        <strong>Score:</strong> {{ game.score }} | 
-                        <strong>Data:</strong> {{ game.played_at|date:"d/m/Y H:i" }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-md-12">
-            <p class="text-muted">Nenhum score registrado ainda. Comece a jogar!</p>
+        <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background:rgba(0,0,0,0.03);border-radius:8px;">
+            <span>{{ game.game_name }}</span>
+            <span class="badge bg-primary">{{ game.score }} pts</span>
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
-
 <style>
-    .hover-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-    }
+.game-card{transition:transform .3s ease,box-shadow .3s ease;cursor:pointer;}
+.game-card:hover{transform:translateY(-8px);box-shadow:0 15px 35px rgba(0,0,0,.2)!important;}
 </style>
 {% endblock %}

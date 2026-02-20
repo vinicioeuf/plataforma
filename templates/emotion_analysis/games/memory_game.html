@@ -1,221 +1,113 @@
 {% extends 'base.html' %}
-
-{% block title %}Jogo da Memória - Plataforma de Saúde Mental{% endblock %}
-
+{% block title %}Jogo da Memória - EmotionAI{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<div class="container pb-5">
     <div class="row mb-4">
-        <div class="col-md-8 mx-auto">
-            <h1 class="text-center mb-4">🧠 Jogo da Memória</h1>
-            
-            <div class="row text-center mb-4">
-                <div class="col-md-4">
-                    <h5>Pares Encontrados: <span id="pairs">0</span>/6</h5>
-                </div>
-                <div class="col-md-4">
-                    <h5>Tentativas: <span id="attempts">0</span></h5>
-                </div>
-                <div class="col-md-4">
-                    <h5>Tempo: <span id="timer">0:00</span></h5>
-                </div>
-            </div>
-
-            <div id="game-board" class="memory-game mb-4">
-                <!-- Cards serão gerados por JavaScript -->
-            </div>
-
-            <div class="text-center">
-                <button class="btn btn-primary btn-lg" onclick="resetGame()">Novo Jogo</button>
-                <a href="{% url 'games_menu' %}" class="btn btn-secondary btn-lg">Voltar</a>
-            </div>
-
-            <div id="game-over" class="alert alert-success mt-4" style="display: none;">
-                <h4>Parabéns! 🎉</h4>
-                <p>Você completou o jogo em <strong id="final-time"></strong> com <strong id="final-attempts"></strong> tentativas!</p>
-                <button class="btn btn-success" onclick="submitScore()">Salvar Score</button>
-            </div>
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-grid-3x3-gap"></i> Jogo da Memória</h1>
+            <p class="text-muted">Encontre os pares de emoções. Foque no momento presente.</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div><span class="badge bg-primary fs-6" id="scoreDisplay">Pontos: 0</span>
+            <span class="badge bg-secondary fs-6 ms-2" id="movesDisplay">Movimentos: 0</span></div>
+            <div><span class="badge bg-info fs-6" id="timerDisplay">⏱️ 0:00</span></div>
+            <button class="btn btn-sm btn-success" id="newGameBtn"><i class="bi bi-arrow-clockwise"></i> Novo Jogo</button>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div id="gameBoard" class="d-flex flex-wrap justify-content-center gap-2"></div>
+        </div>
+    </div>
+    <div id="gameComplete" class="card p-4 mt-4 text-center d-none" style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(33,150,243,.15));border:2px solid rgba(76,175,80,.4);">
+        <h3>🎉 Parabéns!</h3>
+        <p class="fs-5">Você completou o jogo!</p>
+        <div class="d-flex justify-content-center gap-3 mb-3">
+            <span class="badge bg-primary fs-6 p-2" id="finalScore">0 pts</span>
+            <span class="badge bg-info fs-6 p-2" id="finalTime">0:00</span>
+            <span class="badge bg-secondary fs-6 p-2" id="finalMoves">0 moves</span>
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+            <button class="btn btn-success" onclick="startNewGame()"><i class="bi bi-arrow-clockwise"></i> Jogar Novamente</button>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light">Menu de Jogos</a>
         </div>
     </div>
 </div>
-
 <style>
-    .memory-game {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        perspective: 1000px;
-    }
-
-    .memory-card {
-        width: 100%;
-        padding-bottom: 100%;
-        position: relative;
-        cursor: pointer;
-    }
-
-    .memory-card-inner {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
-    }
-
-    .memory-card.flipped .memory-card-inner {
-        transform: rotateY(180deg);
-    }
-
-    .memory-card-front, .memory-card-back {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        font-weight: bold;
-        border-radius: 10px;
-    }
-
-    .memory-card-front {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .memory-card-back {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        transform: rotateY(180deg);
-    }
-
-    .memory-card.matched .memory-card-back {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
+.memory-card{width:80px;height:80px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;transition:all .3s ease;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;user-select:none;border:2px solid transparent;}
+.memory-card:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.3);}
+.memory-card.flipped{background:rgba(255,255,255,.15);border-color:var(--primary);transform:rotateY(180deg);}
+.memory-card.matched{background:rgba(76,175,80,.3);border-color:#4CAF50;cursor:default;animation:matchPulse .5s ease;}
+@keyframes matchPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+@media(min-width:768px){.memory-card{width:100px;height:100px;font-size:2.5rem;}}
 </style>
-
 <script>
-    const emojis = ['🎯', '🎪', '🎨', '🎭', '🎬', '🎤'];
-    let cards = [];
-    let flipped = [];
-    let matched = [];
-    let attempts = 0;
-    let startTime = null;
-    let timerInterval = null;
+const emojis=['😊','😢','😡','😨','😲','🤢','😌','🥰','😤','🤗','😰','🎭'];
+let cards=[],flippedCards=[],matchedPairs=0,moves=0,score=0,gameTimer,seconds=0,gameActive=false;
 
-    function initGame() {
-        const board = document.getElementById('game-board');
-        board.innerHTML = '';
-        
-        // Duplicar emojis e embaralhar
-        cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
-        flipped = [];
-        matched = [];
-        attempts = 0;
-        
-        document.getElementById('attempts').textContent = attempts;
-        document.getElementById('pairs').textContent = 0;
-        document.getElementById('game-over').style.display = 'none';
-        
-        startTime = Date.now();
-        startTimer();
-        
-        cards.forEach((emoji, index) => {
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'memory-card';
-            cardDiv.innerHTML = `
-                <div class="memory-card-inner">
-                    <div class="memory-card-front">?</div>
-                    <div class="memory-card-back">${emoji}</div>
-                </div>
-            `;
-            cardDiv.onclick = () => flipCard(index, cardDiv);
-            board.appendChild(cardDiv);
-        });
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function startNewGame(){
+    const board=document.getElementById('gameBoard');
+    board.innerHTML='';
+    const selected=shuffle([...emojis]).slice(0,8);
+    cards=shuffle([...selected,...selected]);
+    flippedCards=[];matchedPairs=0;moves=0;score=0;seconds=0;gameActive=true;
+    document.getElementById('gameComplete').classList.add('d-none');
+    updateDisplay();
+    clearInterval(gameTimer);
+    gameTimer=setInterval(()=>{seconds++;updateTimer();},1000);
+    cards.forEach((emoji,idx)=>{
+        const card=document.createElement('div');
+        card.className='memory-card';card.dataset.idx=idx;card.dataset.emoji=emoji;card.textContent='❓';
+        card.addEventListener('click',()=>flipCard(card));
+        board.appendChild(card);
+    });
+}
+
+function flipCard(card){
+    if(!gameActive||flippedCards.length>=2||card.classList.contains('flipped')||card.classList.contains('matched'))return;
+    card.classList.add('flipped');card.textContent=card.dataset.emoji;flippedCards.push(card);
+    if(flippedCards.length===2){moves++;checkMatch();}
+    updateDisplay();
+}
+
+function checkMatch(){
+    const[a,b]=flippedCards;
+    if(a.dataset.emoji===b.dataset.emoji){
+        a.classList.add('matched');b.classList.add('matched');matchedPairs++;score+=10;
+        flippedCards=[];
+        if(matchedPairs===8)endGame();
+    }else{
+        gameActive=false;
+        setTimeout(()=>{a.classList.remove('flipped');b.classList.remove('flipped');a.textContent='❓';b.textContent='❓';flippedCards=[];gameActive=true;},800);
     }
+    updateDisplay();
+}
 
-    function flipCard(index, element) {
-        if (flipped.includes(index) || matched.includes(index) || flipped.length >= 2) return;
-        
-        flipped.push(index);
-        element.classList.add('flipped');
-        
-        if (flipped.length === 2) {
-            attempts++;
-            document.getElementById('attempts').textContent = attempts;
-            
-            setTimeout(checkMatch, 600);
-        }
-    }
+function endGame(){
+    gameActive=false;clearInterval(gameTimer);
+    const bonus=Math.max(0,100-moves*2-seconds);score+=bonus;
+    document.getElementById('finalScore').textContent=score+' pts';
+    document.getElementById('finalTime').textContent=formatTime(seconds);
+    document.getElementById('finalMoves').textContent=moves+' movimentos';
+    document.getElementById('gameComplete').classList.remove('d-none');
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Memory Game',score:score,time_spent:seconds})
+    });
+}
 
-    function checkMatch() {
-        const [first, second] = flipped;
-        const match = cards[first] === cards[second];
-        
-        const cards_elements = document.querySelectorAll('.memory-card');
-        
-        if (match) {
-            matched.push(first, second);
-            cards_elements[first].classList.add('matched');
-            cards_elements[second].classList.add('matched');
-            document.getElementById('pairs').textContent = matched.length / 2;
-            
-            if (matched.length === cards.length) {
-                endGame();
-            }
-        } else {
-            cards_elements[first].classList.remove('flipped');
-            cards_elements[second].classList.remove('flipped');
-        }
-        
-        flipped = [];
-    }
+function updateDisplay(){
+    document.getElementById('scoreDisplay').textContent='Pontos: '+score;
+    document.getElementById('movesDisplay').textContent='Movimentos: '+moves;
+}
+function updateTimer(){document.getElementById('timerDisplay').textContent='⏱️ '+formatTime(seconds);}
+function formatTime(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
 
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            document.getElementById('timer').textContent = 
-                `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-    }
-
-    function endGame() {
-        clearInterval(timerInterval);
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        document.getElementById('final-time').textContent = timeStr;
-        document.getElementById('final-attempts').textContent = attempts;
-        document.getElementById('game-over').style.display = 'block';
-    }
-
-    function resetGame() {
-        clearInterval(timerInterval);
-        initGame();
-    }
-
-    function submitScore() {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        fetch('{% url "save_game_score" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                game_name: 'Memory Game',
-                score: 100 - attempts * 2,
-                time_spent: elapsed
-            })
-        }).then(r => r.json()).then(d => {
-            alert('Score salvo com sucesso!');
-        });
-    }
-
-    // Inicializar jogo ao carregar
-    document.addEventListener('DOMContentLoaded', initGame);
+document.getElementById('newGameBtn').addEventListener('click',startNewGame);
+startNewGame();
 </script>
 {% endblock %}

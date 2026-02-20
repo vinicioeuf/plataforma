@@ -1,152 +1,154 @@
 {% extends 'base.html' %}
-
-{% block title %}Exercício de Respiração - Plataforma de Saúde Mental{% endblock %}
-
+{% block title %}Respiração Guiada - EmotionAI{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <h1 class="text-center mb-4">🫁 Exercício de Respiração Guiado</h1>
-            
-            <div class="card shadow">
-                <div class="card-body text-center">
-                    <p class="text-muted mb-4">Siga as instruções para um exercício de respiração relaxante</p>
-                    
-                    <div id="breathing-circle" class="breathing-circle"></div>
-                    
-                    <h3 id="instruction" class="mt-4 mb-4">Prepare-se</h3>
-                    
-                    <div class="row mt-5">
-                        <div class="col-md-12">
-                            <h5>Ciclos Completados: <span id="cycles">0</span>/4</h5>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <button class="btn btn-success btn-lg" onclick="startExercise()">Começar</button>
-                        <a href="{% url 'games_menu' %}" class="btn btn-secondary btn-lg">Voltar</a>
-                    </div>
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-lungs"></i> Respiração Guiada</h1>
+            <p class="text-muted">Técnica 4-7-8 para acalmar corpo e mente.</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4 text-center">
+                <div id="breathCircle" class="breath-circle mx-auto mb-4">
+                    <span id="breathText" class="breath-text">Preparar</span>
+                    <span id="breathCount" class="breath-count"></span>
                 </div>
+                <h4 id="instruction" class="fw-bold mb-2">Pressione iniciar quando estiver pronto</h4>
+                <p id="subInstruction" class="text-muted mb-4">Encontre uma posição confortável</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <span class="badge bg-info fs-6" id="cycleCount">Ciclo: 0/5</span>
+                    <span class="badge bg-secondary fs-6" id="totalTime">⏱️ 0:00</span>
+                </div>
+                <div class="progress mb-3" style="height:8px;background:rgba(255,255,255,.1);border-radius:10px;">
+                    <div id="progressBar" class="progress-bar" style="width:0%;transition:width .5s ease;"></div>
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button id="startBtn" class="btn btn-success btn-lg" onclick="startBreathing()"><i class="bi bi-play-fill"></i> Iniciar</button>
+                    <button id="stopBtn" class="btn btn-danger btn-lg d-none" onclick="stopBreathing()"><i class="bi bi-stop-fill"></i> Parar</button>
+                </div>
+            </div>
+            <div id="completeCard" class="card p-4 mt-4 text-center d-none" style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(0,150,136,.15));border:2px solid rgba(76,175,80,.4);">
+                <h3>🧘 Sessão Completa!</h3>
+                <p class="fs-5">Parabéns por cuidar do seu bem-estar</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <span class="badge bg-success fs-6 p-2" id="finalCycles">0 ciclos</span>
+                    <span class="badge bg-info fs-6 p-2" id="finalTime">0:00</span>
+                </div>
+                <p class="text-muted">Como você se sente agora?</p>
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <button class="btn btn-outline-success btn-lg" onclick="rateMood('relaxed')">😌 Relaxado</button>
+                    <button class="btn btn-outline-primary btn-lg" onclick="rateMood('calm')">😊 Calmo</button>
+                    <button class="btn btn-outline-warning btn-lg" onclick="rateMood('neutral')">😐 Neutro</button>
+                </div>
+                <a href="{% url 'games_menu' %}" class="btn btn-outline-light mt-2">Menu de Jogos</a>
             </div>
         </div>
     </div>
 </div>
-
 <style>
-    .breathing-circle {
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin: 30px auto;
-        box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    @keyframes breathe-in {
-        0% {
-            width: 200px;
-            height: 200px;
-            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
-        }
-        100% {
-            width: 300px;
-            height: 300px;
-            box-shadow: 0 5px 50px rgba(102, 126, 234, 0.8);
-        }
-    }
-
-    @keyframes breathe-out {
-        0% {
-            width: 300px;
-            height: 300px;
-            box-shadow: 0 5px 50px rgba(102, 126, 234, 0.8);
-        }
-        100% {
-            width: 200px;
-            height: 200px;
-            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
-        }
-    }
-
-    .breathing-circle.inhale {
-        animation: breathe-in 4s ease-in-out forwards;
-    }
-
-    .breathing-circle.exhale {
-        animation: breathe-out 4s ease-in-out forwards;
-    }
+.breath-circle{width:200px;height:200px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(33,150,243,.3),rgba(76,175,80,.15));border:3px solid rgba(33,150,243,.4);transition:all 1s ease;position:relative;}
+.breath-circle.inhale{transform:scale(1.3);background:radial-gradient(circle,rgba(33,150,243,.5),rgba(33,150,243,.2));border-color:rgba(33,150,243,.7);}
+.breath-circle.hold{transform:scale(1.3);background:radial-gradient(circle,rgba(255,193,7,.4),rgba(255,193,7,.15));border-color:rgba(255,193,7,.7);}
+.breath-circle.exhale{transform:scale(1);background:radial-gradient(circle,rgba(76,175,80,.4),rgba(76,175,80,.15));border-color:rgba(76,175,80,.7);}
+.breath-text{font-size:1.2rem;font-weight:bold;color:white;}
+.breath-count{font-size:2.5rem;font-weight:bold;color:white;}
 </style>
-
 <script>
-    let isExercising = false;
-    let cycles = 0;
+let isRunning=false,currentCycle=0,totalCycles=5,timer=null,totalSeconds=0,totalTimer=null;
+const circle=document.getElementById('breathCircle'),bText=document.getElementById('breathText'),bCount=document.getElementById('breathCount');
 
-    function startExercise() {
-        if (isExercising) return;
+function startBreathing(){
+    isRunning=true;currentCycle=0;totalSeconds=0;
+    document.getElementById('startBtn').classList.add('d-none');
+    document.getElementById('stopBtn').classList.remove('d-none');
+    document.getElementById('completeCard').classList.add('d-none');
+    totalTimer=setInterval(()=>{totalSeconds++;document.getElementById('totalTime').textContent='⏱️ '+formatTime(totalSeconds);},1000);
+    runCycle();
+}
+
+function stopBreathing(){
+    isRunning=false;clearInterval(totalTimer);
+    document.getElementById('startBtn').classList.remove('d-none');
+    document.getElementById('stopBtn').classList.add('d-none');
+    circle.className='breath-circle mx-auto mb-4';
+    bText.textContent='Preparar';bCount.textContent='';
+    document.getElementById('instruction').textContent='Sessão pausada';
+}
+
+async function runCycle(){
+    if(!isRunning)return;
+    for(let c=0;c<totalCycles&&isRunning;c++){
+        currentCycle=c+1;
+        document.getElementById('cycleCount').textContent=`Ciclo: ${currentCycle}/${totalCycles}`;
+        document.getElementById('progressBar').style.width=((currentCycle-1)/totalCycles*100)+'%';
         
-        isExercising = true;
-        cycles = 0;
-        document.getElementById('cycles').textContent = 0;
-        document.querySelector('.btn-success').disabled = true;
+        // Inspire - 4s
+        if(!isRunning)return;
+        circle.className='breath-circle mx-auto mb-4 inhale';
+        document.getElementById('instruction').textContent='Inspire pelo nariz';
+        document.getElementById('subInstruction').textContent='Sinta o ar enchendo seus pulmões';
+        bText.textContent='INSPIRE';
+        await countdown(4);
         
-        runCycle();
+        // Segure - 7s
+        if(!isRunning)return;
+        circle.className='breath-circle mx-auto mb-4 hold';
+        document.getElementById('instruction').textContent='Segure a respiração';
+        document.getElementById('subInstruction').textContent='Mantenha o ar nos pulmões';
+        bText.textContent='SEGURE';
+        await countdown(7);
+        
+        // Expire - 8s
+        if(!isRunning)return;
+        circle.className='breath-circle mx-auto mb-4 exhale';
+        document.getElementById('instruction').textContent='Expire pela boca';
+        document.getElementById('subInstruction').textContent='Solte o ar lentamente';
+        bText.textContent='EXPIRE';
+        await countdown(8);
+        
+        document.getElementById('progressBar').style.width=(currentCycle/totalCycles*100)+'%';
     }
+    if(isRunning)completeSession();
+}
 
-    function runCycle() {
-        if (cycles >= 4) {
-            endExercise();
-            return;
-        }
+function countdown(secs){
+    return new Promise(resolve=>{
+        let remaining=secs;
+        bCount.textContent=remaining;
+        const iv=setInterval(()=>{
+            if(!isRunning){clearInterval(iv);resolve();return;}
+            remaining--;
+            bCount.textContent=remaining>0?remaining:'';
+            if(remaining<=0){clearInterval(iv);resolve();}
+        },1000);
+    });
+}
 
-        cycles++;
-        document.getElementById('cycles').textContent = cycles;
+function completeSession(){
+    isRunning=false;clearInterval(totalTimer);
+    document.getElementById('startBtn').classList.remove('d-none');
+    document.getElementById('stopBtn').classList.add('d-none');
+    circle.className='breath-circle mx-auto mb-4';
+    bText.textContent='✨';bCount.textContent='';
+    document.getElementById('instruction').textContent='Muito bem!';
+    document.getElementById('subInstruction').textContent='Sessão completada com sucesso';
+    document.getElementById('finalCycles').textContent=currentCycle+' ciclos';
+    document.getElementById('finalTime').textContent=formatTime(totalSeconds);
+    document.getElementById('completeCard').classList.remove('d-none');
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Breathing Exercise',score:currentCycle*20,time_spent:totalSeconds})
+    });
+}
 
-        // Inspiração
-        const circle = document.getElementById('breathing-circle');
-        circle.className = 'breathing-circle inhale';
-        document.getElementById('instruction').textContent = 'Inspire...';
-        
-        setTimeout(() => {
-            // Pausa
-            circle.className = 'breathing-circle';
-            document.getElementById('instruction').textContent = 'Segure...';
-            
-            setTimeout(() => {
-                // Expiração
-                circle.className = 'breathing-circle exhale';
-                document.getElementById('instruction').textContent = 'Expire...';
-                
-                setTimeout(() => {
-                    circle.className = 'breathing-circle';
-                    document.getElementById('instruction').textContent = 'Pausa...';
-                    
-                    setTimeout(() => {
-                        runCycle();
-                    }, 2000);
-                }, 4000);
-            }, 4000);
-        }, 4000);
-    }
+function rateMood(mood){
+    document.querySelectorAll('#completeCard .btn-outline-success, #completeCard .btn-outline-primary, #completeCard .btn-outline-warning').forEach(b=>{b.classList.remove('active');b.disabled=true;});
+    event.target.classList.add('active');
+    document.getElementById('subInstruction').textContent='Obrigado pelo feedback! 💝';
+}
 
-    function endExercise() {
-        isExercising = false;
-        document.getElementById('instruction').textContent = '✨ Exercício Completo! Você se sente melhor?';
-        document.querySelector('.btn-success').disabled = false;
-        document.querySelector('.btn-success').textContent = 'Refazer';
-        
-        // Salvar como atividade
-        fetch('{% url "save_game_score" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                game_name: 'Breathing Exercise',
-                score: 50,
-                time_spent: 128
-            })
-        });
-    }
+function formatTime(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
 </script>
 {% endblock %}

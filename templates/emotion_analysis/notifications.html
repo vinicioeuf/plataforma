@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Notificações - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h1 class="page-heading"><i class="bi bi-bell"></i> Notificações</h1>
+            <button class="btn btn-sm btn-outline-primary" id="readAllBtn"><i class="bi bi-check-all"></i> Marcar todas como lidas</button>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {% for notif in notifications %}
+            <div class="card p-3 mb-2 notification-card {% if not notif.is_read %}unread{% endif %}" data-id="{{ notif.id }}" {% if notif.link %}onclick="window.location='{{ notif.link }}'"{% endif %} style="cursor:pointer;transition:all .2s ease;{% if not notif.is_read %}border-left:4px solid var(--primary);{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ notif.title }}</h6>
+                        <p class="text-muted mb-1 small">{{ notif.message }}</p>
+                        <small class="text-muted">{{ notif.created_at|timesince }} atrás</small>
+                    </div>
+                    {% if not notif.is_read %}
+                    <span class="badge bg-primary">Novo</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <div style="font-size:3rem;">🔔</div>
+                <p class="text-muted mt-2">Nenhuma notificação por enquanto.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+.notification-card:hover{transform:translateX(4px);box-shadow:0 4px 15px rgba(0,0,0,.2)!important;}
+.notification-card.unread{background:rgba(33,150,243,.05)!important;}
+</style>
+<script>
+// Mark individual as read on click
+document.querySelectorAll('.notification-card.unread').forEach(card=>{
+    card.addEventListener('click',function(){
+        const id=this.dataset.id;
+        fetch(`/notifications/${id}/read/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}});
+        this.classList.remove('unread');this.style.borderLeft='none';
+        const badge=this.querySelector('.badge');if(badge)badge.remove();
+    });
+});
+// Mark all as read
+document.getElementById('readAllBtn').addEventListener('click',function(){
+    fetch('/notifications/read-all/',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}}).then(()=>{
+        document.querySelectorAll('.notification-card.unread').forEach(c=>{
+            c.classList.remove('unread');c.style.borderLeft='none';
+            const badge=c.querySelector('.badge');if(badge)badge.remove();
+        });
+    });
+});
+</script>
+{% endblock %}

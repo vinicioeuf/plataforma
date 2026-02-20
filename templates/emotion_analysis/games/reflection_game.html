@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Reflexão Adaptativa - EmotionAI{% endblock %}
+{% block content %}
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div><h1 class="page-heading"><i class="bi bi-chat-heart"></i> Reflexão Adaptativa</h1>
+            <p class="text-muted">Perguntas reflexivas adaptadas ao seu humor. ~5 minutos.</p></div>
+            <a href="{% url 'games_menu' %}" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Mood Selection -->
+            <div id="moodSelect" class="card p-4 text-center mb-3">
+                <h4 class="fw-bold mb-3">Como você está se sentindo agora?</h4>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('happy')">
+                        <div style="font-size:2.5rem;">😊</div><small>Feliz</small></button>
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('sad')">
+                        <div style="font-size:2.5rem;">😢</div><small>Triste</small></button>
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('anxious')">
+                        <div style="font-size:2.5rem;">😰</div><small>Ansioso</small></button>
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('angry')">
+                        <div style="font-size:2.5rem;">😡</div><small>Com Raiva</small></button>
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('neutral')">
+                        <div style="font-size:2.5rem;">😐</div><small>Neutro</small></button>
+                    <button class="btn btn-outline-light p-3 mood-btn" onclick="selectMood('tired')">
+                        <div style="font-size:2.5rem;">😴</div><small>Cansado</small></button>
+                </div>
+            </div>
+
+            <!-- Reflection Area -->
+            <div id="reflectionArea" class="d-none">
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary fs-6" id="questionNum">Reflexão 1/5</span>
+                        <span class="badge bg-info fs-6" id="timerDisplay">⏱️ 5:00</span>
+                    </div>
+                    <div class="progress mt-2" style="height:6px;background:rgba(255,255,255,.1);">
+                        <div id="progressBar" class="progress-bar bg-primary" style="width:0%;transition:width .3s ease;"></div>
+                    </div>
+                </div>
+                <div id="questionCard" class="card p-4 text-center mb-3">
+                    <div id="qEmoji" style="font-size:3rem;"></div>
+                    <h4 id="qText" class="fw-bold mt-2 mb-3"></h4>
+                    <textarea id="answerInput" class="form-control" rows="4" placeholder="Escreva sua reflexão aqui..." style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;resize:none;"></textarea>
+                    <div class="d-flex justify-content-between mt-3">
+                        <small class="text-muted" id="charCount">0/500</small>
+                        <button class="btn btn-primary" onclick="nextQuestion()">Próxima <i class="bi bi-arrow-right"></i></button>
+                    </div>
+                </div>
+                <div id="affirmation" class="card p-3 text-center d-none" style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);">
+                    <p class="mb-0 fw-bold" id="affirmationText"></p>
+                </div>
+            </div>
+
+            <!-- Complete -->
+            <div id="completeCard" class="card p-4 text-center d-none" style="background:linear-gradient(135deg,rgba(103,58,183,.15),rgba(33,150,243,.15));border:2px solid rgba(103,58,183,.4);">
+                <h3>💭 Reflexão Completa!</h3>
+                <p class="fs-5">Parabéns por dedicar tempo ao autoconhecimento</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <span class="badge bg-primary fs-5 p-2" id="finalScore">0 pts</span>
+                    <span class="badge bg-success fs-5 p-2" id="finalAnswered">0 reflexões</span>
+                </div>
+                <div id="summary" class="text-start mb-3"></div>
+                <p class="text-muted fst-italic" id="closingMessage"></p>
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                    <button class="btn btn-success" onclick="restart()"><i class="bi bi-arrow-clockwise"></i> Novo</button>
+                    <a href="{% url 'games_menu' %}" class="btn btn-outline-light">Menu</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const QUESTIONS={
+    happy:[
+        {emoji:'🌟',text:'O que aconteceu hoje que te fez feliz?'},
+        {emoji:'🎯',text:'Como você pode usar essa energia positiva para ajudar alguém?'},
+        {emoji:'🙏',text:'Pelo que você é mais grato(a) neste momento?'},
+        {emoji:'🌈',text:'Qual memória feliz você gostaria de guardar para sempre?'},
+        {emoji:'💫',text:'Que atividade te traz essa mesma sensação de bem-estar?'},
+    ],
+    sad:[
+        {emoji:'💙',text:'O que está pesando no seu coração agora?'},
+        {emoji:'🤗',text:'Se pudesse falar com um amigo, o que diria?'},
+        {emoji:'🌱',text:'Que pequena coisa poderia te trazer um pouco de conforto agora?'},
+        {emoji:'💪',text:'Lembre de um momento difícil que você superou. Como conseguiu?'},
+        {emoji:'🌅',text:'O que você gostaria que fosse diferente amanhã?'},
+    ],
+    anxious:[
+        {emoji:'🫂',text:'O que exatamente está te preocupando neste momento?'},
+        {emoji:'🎯',text:'Essa preocupação é algo que você pode controlar?'},
+        {emoji:'🌊',text:'Se pudesse dar um conselho a alguém na mesma situação, o que diria?'},
+        {emoji:'📝',text:'Qual o pior cenário possível? E qual o mais provável?'},
+        {emoji:'🧘',text:'O que te ajuda a se sentir mais seguro(a)?'},
+    ],
+    angry:[
+        {emoji:'🔥',text:'O que causou essa raiva?'},
+        {emoji:'🤔',text:'Existe outro ponto de vista para essa situação?'},
+        {emoji:'💨',text:'Se essa raiva fosse uma tempestade, como ela seria?'},
+        {emoji:'🛡️',text:'Que necessidade sua não está sendo atendida?'},
+        {emoji:'🕊️',text:'O que você precisa para encontrar paz nessa situação?'},
+    ],
+    neutral:[
+        {emoji:'🔍',text:'O que está ocupando seus pensamentos agora?'},
+        {emoji:'⚡',text:'O que poderia tornar seu dia mais interessante?'},
+        {emoji:'🎨',text:'Se pudesse fazer qualquer coisa agora, o que faria?'},
+        {emoji:'📖',text:'Que lição importante você aprendeu recentemente?'},
+        {emoji:'🌟',text:'Qual é um sonho que você ainda quer realizar?'},
+    ],
+    tired:[
+        {emoji:'🛌',text:'O que mais está consumindo sua energia ultimamente?'},
+        {emoji:'⚡',text:'O que te recarrega quando está esgotado(a)?'},
+        {emoji:'🎯',text:'Existe algo na sua rotina que poderia mudar?'},
+        {emoji:'🌿',text:'Quando foi a última vez que fez algo só para você?'},
+        {emoji:'💝',text:'Se pudesse descansar sem culpa, como seria?'},
+    ]
+};
+
+const AFFIRMATIONS={
+    happy:['Sua alegria ilumina o mundo ao redor!','Continue cultivando esses momentos.','A felicidade é mais bonita quando compartilhada.'],
+    sad:['Está tudo bem não estar bem.','Essa dor vai passar, você é mais forte do que pensa.','Permita-se sentir, sem julgamento.'],
+    anxious:['Respire. Você está seguro(a) agora.','Uma coisa de cada vez, não precisa resolver tudo hoje.','Você já enfrentou desafios antes e vai superar.'],
+    angry:['Sua raiva é válida, mas você decide o que fazer com ela.','Respire fundo. A calma é uma força.','Reconhecer a raiva é o primeiro passo.'],
+    neutral:['Momentos neutros são perfeitos para reflexão.','A calma é um superpoder.','Aproveite essa tranquilidade.'],
+    tired:['Descansar é produtivo.','Você não precisa dar conta de tudo.','Cuide de si como cuidaria de alguém querido.'],
+};
+
+let mood='',questions=[],currentQ=0,answers=[],score=0,timer=null,seconds=300;
+
+function selectMood(m){
+    mood=m;
+    questions=[...QUESTIONS[m]];
+    currentQ=0;answers=[];score=0;seconds=300;
+    document.getElementById('moodSelect').classList.add('d-none');
+    document.getElementById('reflectionArea').classList.remove('d-none');
+    document.getElementById('completeCard').classList.add('d-none');
+    clearInterval(timer);
+    timer=setInterval(()=>{
+        seconds--;
+        document.getElementById('timerDisplay').textContent='⏱️ '+formatTime(seconds);
+        if(seconds<=0)complete();
+    },1000);
+    showQuestion();
+}
+
+function showQuestion(){
+    if(currentQ>=questions.length)return complete();
+    const q=questions[currentQ];
+    document.getElementById('qEmoji').textContent=q.emoji;
+    document.getElementById('qText').textContent=q.text;
+    document.getElementById('answerInput').value='';
+    document.getElementById('questionNum').textContent=`Reflexão ${currentQ+1}/${questions.length}`;
+    document.getElementById('progressBar').style.width=(currentQ/questions.length*100)+'%';
+    document.getElementById('charCount').textContent='0/500';
+    document.getElementById('answerInput').focus();
+    
+    // Show affirmation
+    const affs=AFFIRMATIONS[mood];
+    const aff=affs[Math.floor(Math.random()*affs.length)];
+    const affDiv=document.getElementById('affirmation');
+    document.getElementById('affirmationText').textContent='💡 '+aff;
+    affDiv.classList.remove('d-none');
+    setTimeout(()=>affDiv.classList.add('d-none'),4000);
+}
+
+function nextQuestion(){
+    const text=document.getElementById('answerInput').value.trim();
+    if(text.length>10){
+        answers.push({question:questions[currentQ].text,answer:text});
+        score+=20;
+    }
+    currentQ++;showQuestion();
+}
+
+function complete(){
+    clearInterval(timer);
+    document.getElementById('reflectionArea').classList.add('d-none');
+    if(answers.length>=3)score+=30;
+    document.getElementById('finalScore').textContent=score+' pts';
+    document.getElementById('finalAnswered').textContent=answers.length+' reflexões';
+    
+    const closings={
+        happy:'Continue espalhando essa energia positiva! ✨',
+        sad:'Você tomou um passo importante ao refletir. A dor é temporária. 💙',
+        anxious:'Respirar e refletir já ajuda a aliviar a ansiedade. Você está no caminho. 🌿',
+        angry:'Reconhecer e processar a raiva é sinal de inteligência emocional. 🕊️',
+        neutral:'Reflexão na calma é um presente precioso. 🌟',
+        tired:'Descansar e refletir é se cuidar. Você merece. 💝',
+    };
+    document.getElementById('closingMessage').textContent=closings[mood]||'Parabéns pela reflexão!';
+    document.getElementById('completeCard').classList.remove('d-none');
+    
+    // Save as journal
+    if(answers.length>0){
+        const content='💭 Reflexão adaptativa ('+mood+'):\n\n'+answers.map(a=>`❓ ${a.question}\n💬 ${a.answer}`).join('\n\n');
+        fetch('{% url "save_journal_entry" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+            body:JSON.stringify({content:content,mood_rating:mood==='happy'?5:mood==='sad'?2:mood==='angry'?2:3,visibility:'private',entry_type:'text'})
+        });
+    }
+    fetch('{% url "save_game_score" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body:JSON.stringify({game_name:'Reflection Game',score:score,time_spent:300-seconds,emotion_before:mood})
+    });
+}
+
+function restart(){
+    document.getElementById('moodSelect').classList.remove('d-none');
+    document.getElementById('reflectionArea').classList.add('d-none');
+    document.getElementById('completeCard').classList.add('d-none');
+}
+
+function formatTime(s){const m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60);}
+document.getElementById('answerInput').addEventListener('input',function(){
+    document.getElementById('charCount').textContent=this.value.length+'/500';
+});
+</script>
+<style>
+.mood-btn{min-width:100px;border-radius:16px;transition:all .3s ease;}
+.mood-btn:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,0,0,.3);}
+</style>
+{% endblock %}
