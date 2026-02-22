@@ -6,22 +6,22 @@ import base64
 
 
 class AudioRecording(models.Model):
-    """Modelo para armazenar gravações de áudio dos usuários"""
+    """Modelo para armazenar desabafos em áudio dos usuários"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='audio_recordings', verbose_name='Usuário')
     title = models.CharField(max_length=200, verbose_name='Título')
     description = models.TextField(blank=True, verbose_name='Descrição')
     audio_file = models.FileField(
-        upload_to='audio_recordings/%Y/%m/%d/',
+        upload_to='desabafos/%Y/%m/%d/',
         validators=[FileExtensionValidator(allowed_extensions=['mp3', 'wav', 'ogg', 'webm', 'm4a'])],
-        verbose_name='Arquivo de Áudio'
+        verbose_name='Arquivo de Desabafo'
     )
     duration = models.FloatField(null=True, blank=True, help_text='Duração em segundos', verbose_name='Duração')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = 'Gravação de Áudio'
-        verbose_name_plural = 'Gravações de Áudio'
+        verbose_name = 'Desabafo em Áudio'
+        verbose_name_plural = 'Desabafos em Áudio'
 
     def __str__(self):
         return f"{self.title} - {self.user.username}"
@@ -33,7 +33,7 @@ class EmotionAnalysis(models.Model):
         ('alegria', 'Alegria'), ('tristeza', 'Tristeza'), ('raiva', 'Raiva'),
         ('medo', 'Medo'), ('surpresa', 'Surpresa'), ('nojo', 'Nojo'), ('neutro', 'Neutro'),
     ]
-    recording = models.OneToOneField(AudioRecording, on_delete=models.CASCADE, related_name='emotion_analysis', verbose_name='Gravação')
+    recording = models.OneToOneField(AudioRecording, on_delete=models.CASCADE, related_name='emotion_analysis', verbose_name='Desabafo')
     dominant_emotion = models.CharField(max_length=20, choices=EMOTION_CHOICES, verbose_name='Emoção Dominante')
     confidence = models.FloatField(help_text='Confiança da análise (0-1)', verbose_name='Confiança')
     emotions_data = models.JSONField(help_text='Dados detalhados de todas as emoções detectadas', verbose_name='Dados das Emoções')
@@ -46,7 +46,7 @@ class EmotionAnalysis(models.Model):
         verbose_name_plural = 'Análises de Emoções'
 
     def __str__(self):
-        return f"Análise de '{self.recording.title}' - {self.dominant_emotion}"
+        return f"Análise de desabafo '{self.recording.title}' - {self.dominant_emotion}"
 
     def get_emotion_display_name(self):
         return dict(self.EMOTION_CHOICES).get(self.dominant_emotion, self.dominant_emotion)

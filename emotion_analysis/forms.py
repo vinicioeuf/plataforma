@@ -51,7 +51,7 @@ class RegisterForm(UserCreationForm):
 
 
 class AudioRecordingForm(forms.ModelForm):
-    """Formulário para upload de gravação de áudio"""
+    """Formulário para upload de desabafo em áudio"""
     
     class Meta:
         model = AudioRecording
@@ -59,7 +59,7 @@ class AudioRecordingForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Digite um título para sua gravação'
+                'placeholder': 'Digite um título para seu desabafo'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -74,5 +74,5 @@ class AudioRecordingForm(forms.ModelForm):
         labels = {
             'title': 'Título',
             'description': 'Descrição',
-            'audio_file': 'Arquivo de Áudio'
+            'audio_file': 'Arquivo de Desabafo'
         }

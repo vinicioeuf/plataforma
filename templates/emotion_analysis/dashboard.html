@@ -71,7 +71,7 @@
             </div>
         {% else %}
             <div class="col-6 col-md-3">
-                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_recordings }}</h3><small class="text-muted">Gravações</small></div>
+                <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_recordings }}</h3><small class="text-muted">Desabafos</small></div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="card p-3 text-center h-100"><h3 class="fw-bold mb-0">{{ total_games }}</h3><small class="text-muted">Jogos</small></div>
@@ -147,7 +147,7 @@
                             <i class="bi bi-mic"></i>
                         </span>
                         <div class="quick-action-content">
-                            <strong>Nova gravação</strong>
+                            <strong>Novo desabafo</strong>
                             <small>Capture sinais de voz do paciente.</small>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
@@ -165,7 +165,7 @@
                 {% else %}
                     <a href="{% url 'record_audio' %}" class="quick-action-card primary">
                         <span class="quick-action-icon"><i class="bi bi-mic"></i></span>
-                        <div class="quick-action-content"><strong>Nova gravação</strong><small>Registre sua voz e acompanhe emoções.</small></div>
+                        <div class="quick-action-content"><strong>Novo desabafo</strong><small>Registre sua voz e acompanhe emoções.</small></div>
                         <i class="bi bi-arrow-up-right"></i>
                     </a>
                     <a href="{% url 'games_menu' %}" class="quick-action-card">

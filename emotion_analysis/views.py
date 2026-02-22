@@ -199,8 +199,17 @@ def record_audio(request):
             recording = form.save(commit=False)
             recording.user = request.user
             recording.save()
+            # Adiciona desabafo ao diário/confessionário
+            from .models import JournalEntry
+            JournalEntry.objects.create(
+                user=request.user,
+                content=f"Desabafo: {recording.title}\n{recording.description}",
+                audio_file=recording.audio_file,
+                entry_type='audio',
+                visibility='private',
+            )
             check_achievements(request.user)
-            messages.success(request, 'Áudio enviado com sucesso!')
+            messages.success(request, 'Desabafo enviado e adicionado ao diário/confessionário!')
             return redirect('analyze_audio', recording_id=recording.id)
     else:
         form = AudioRecordingForm()
@@ -244,11 +253,11 @@ def process_emotion_analysis(request, recording_id):
 
 @login_required
 def history(request):
-    recordings = AudioRecording.objects.filter(user=request.user)
+    desabafos = AudioRecording.objects.filter(user=request.user)
     journal_entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')[:10]
     game_scores = GameScore.objects.filter(user=request.user).order_by('-created_at')[:10]
     return render(request, 'emotion_analysis/history.html', {
-        'recordings': recordings, 'journal_entries': journal_entries, 'game_scores': game_scores
+        'desabafos': desabafos, 'journal_entries': journal_entries, 'game_scores': game_scores
     })
 
 

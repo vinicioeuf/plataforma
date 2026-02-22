@@ -58,24 +58,16 @@ Plataforma web desenvolvida em Django e Bootstrap para análise de emoções atr
 
 3. **Ative o ambiente virtual**
    - Windows:
-     ```bash
      venv\Scripts\activate
      ```
-   - Linux/Mac:
-     ```bash
-     source venv/bin/activate
-     ```
-
 4. **Instale as dependências**
    ```bash
    pip install -r requirements.txt
    ```
-
 5. **Execute as migrações do banco de dados**
    ```bash
    python manage.py makemigrations
    python manage.py migrate
-   ```
 
 6. **Crie um superusuário (admin)**
    ```bash
@@ -85,32 +77,29 @@ Plataforma web desenvolvida em Django e Bootstrap para análise de emoções atr
 7. **Execute o servidor de desenvolvimento**
    ```bash
    python manage.py runserver
-   ```
 
 8. **Acesse a aplicação**
    - Abra seu navegador e acesse: `http://127.0.0.1:8000`
    - Painel administrativo: `http://127.0.0.1:8000/admin`
-
 ## 🎯 Como Usar
 
 ### Para Pacientes
 
 1. **Cadastro**: Crie uma conta na página de registro
-2. **Login**: Faça login com suas credenciais
 3. **Configurar Perfil**: Acesse "Meu Perfil" e selecione "Paciente" como tipo de usuário
 4. **Análise de Emoções**: 
    - Acesse "Nova Gravação"
    - Escolha entre gravar um áudio ou fazer upload de um arquivo
-   - Adicione um título e descrição (opcional)
    - Envie para análise
 5. **Jogar**: Acesse a seção "Jogos" para se distrair com:
    - Jogo da Memória
    - Exercício de Respiração Guiado
-   - Jogo de Combinação de Cores
 6. **Agendar Consulta**: 
    - Acesse "Consultas" → "Agendar Consulta"
    - Selecione um profissional de saúde mental
+
    - Escolha data e horário
+
    - Receba confirmação do profissional
 7. **Participar de Consulta**:
    - Acesse a consulta agendada
