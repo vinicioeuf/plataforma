@@ -72,10 +72,10 @@ body.app-body::after {
 }
 
 .navbar {
-    background: rgba(6, 11, 25, 0.55) !important;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-    backdrop-filter: blur(16px);
-    box-shadow: var(--shadow-soft);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,251,0.96));
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 28px rgba(16,24,40,0.06);
     border-radius: 18px;
     margin-top: 24px;
     margin-inline: auto;
@@ -84,7 +84,7 @@ body.app-body::after {
 
 .navbar .nav-link,
 .navbar .navbar-brand {
-    color: white !important;
+    color: var(--text-primary) !important;
 }
 
 .navbar .navbar-brand {
@@ -390,7 +390,7 @@ footer p {
 }
 
 .quick-actions-section .text-muted {
-    color: rgba(226, 232, 240, 0.8) !important;
+    color: rgba(71, 85, 105, 0.95) !important;
 }
 
 .quick-actions-grid {
@@ -399,17 +399,113 @@ footer p {
     gap: 1.25rem;
 }
 
+/* ===== Modern visual tweaks (overrides) ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+    --ui-surface: #ffffff;
+    --muted-surface: #f6f8fb;
+    --text-primary: #0f172a;
+    --muted-text: #475569;
+    --link-accent: var(--primary-500);
+}
+
+html { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+
+/* Softer page background and improved contrast for light pages */
+body.app-body {
+    background: radial-gradient(circle at top left, rgba(99,102,241,0.04), transparent 20%), var(--muted-surface);
+    color: var(--text-primary);
+}
+
+/* Navbar: cleaner, flatter */
+.navbar {
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,251,0.9));
+    border: 1px solid rgba(15, 23, 42, 0.05) !important;
+    box-shadow: 0 6px 24px rgba(16,24,40,0.06);
+}
+.navbar .nav-link, .navbar .navbar-brand { color: var(--text-primary) !important; }
+
+/* Buttons: clearer primary / secondary states */
+.btn-primary {
+    background: var(--gradient-brand);
+    color: white;
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.12);
+}
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary-500);
+    border: 1px solid rgba(99,102,241,0.16);
+}
+
+/* Cards: lift and breathe */
+.card {
+    background: var(--ui-surface);
+    border: 1px solid rgba(15, 23, 42, 0.04);
+    box-shadow: 0 6px 20px rgba(16,24,40,0.06);
+}
+.card-body { padding: 1.25rem 1.5rem; }
+
+/* Headings and section */
+.section-heading { text-align: left; color: var(--text-primary); }
+.section-heading p { color: var(--muted-text); text-align: left; }
+
+/* Quick actions: convert list links into clear actionable items */
+.quick-actions-section .card { background: var(--ui-surface); color: var(--text-primary); }
+.quick-actions-section a { display: flex; align-items: center; gap: 0.6rem; color: var(--link-accent); text-decoration: none; padding: 0.45rem 0; transition: color 0.18s ease, transform 0.12s ease; }
+.quick-actions-section a:hover { color: var(--secondary-500); transform: translateX(4px); }
+.quick-actions-section a .fa, .quick-actions-section a .icon { width: 22px; text-align: center; color: rgba(99,102,241,0.95); }
+
+/* Badges / achievements: subtle chips */
+.badge { background: rgba(99,102,241,0.08); color: var(--primary-500); border: 1px solid rgba(99,102,241,0.12); padding: 0.4rem 0.7rem; border-radius: 999px; }
+.achievement-chip { display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.6rem; background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(250,250,251,0.6)); border-radius: 999px; border:1px solid rgba(15,23,42,0.04); font-weight:600; color:var(--muted-text); }
+
+/* Achievement badge improved contrast */
+.achievement-badge {
+    background: rgba(255, 193, 7, 0.14);
+    color: #b45309; /* darker amber */
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(180, 120, 10, 0.12);
+    font-weight: 700;
+}
+
+/* Emotion badges: more readable on light background */
+.emotion-badge { box-shadow: none; border: 1px solid rgba(15,23,42,0.03); }
+
+/* Workflow steps: lighter hover */
+.workflow-step { background: var(--ui-surface); border: 1px solid rgba(15,23,42,0.03); }
+.workflow-step:hover { transform: translateX(4px); box-shadow: 0 8px 24px rgba(16,24,40,0.06); }
+
+/* Timeline and lists: increase spacing and readability */
+.timeline-item, .timeline-wrapper .timeline-item { background: var(--ui-surface); border: 1px solid rgba(15,23,42,0.03); color: var(--muted-text); }
+
+/* Tiny helpers */
+.muted { color: var(--muted-text); }
+a { color: var(--link-accent); }
+
+/* Responsive tweak: make hero/title breathe on narrow screens */
+@media (max-width: 720px) {
+    .hero-title { font-size: 2rem; }
+    .container, .navbar { width: calc(100% - 24px); }
+}
+
+/* End modern tweaks */
+
 .quick-action-card {
     border: none;
     border-radius: var(--radius-md);
     padding: 1.2rem;
     background: rgba(255, 255, 255, 0.08);
-    color: white;
+    color: var(--text-primary);
     display: flex;
     gap: 0.85rem;
     align-items: center;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    transition: all 0.25s ease;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
     cursor: pointer;
     text-decoration: none;
     z-index: 10;
@@ -417,14 +513,13 @@ footer p {
 }
 
 .quick-action-card.primary {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(56, 189, 248, 0.8));
-    box-shadow: 0 15px 35px -18px rgba(79, 70, 229, 0.9);
+    background: linear-gradient(135deg, var(--primary-600, #4f46e5), var(--primary-700, #4338ca));
+    box-shadow: 0 10px 30px rgba(67,56,202,0.16);
 }
 
 .quick-action-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 18px 42px -24px rgba(0, 0, 0, 0.95);
-    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 18px 42px rgba(16,24,40,0.08);
 }
 
 .quick-action-card.primary:hover {
@@ -437,22 +532,55 @@ footer p {
     border-radius: 14px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(15,23,42,0.06);
     font-size: 1.3rem;
 }
 
 .quick-action-icon.alt {
-    background: rgba(15, 23, 42, 0.45);
+    background: rgba(15, 23, 42, 0.12);
 }
 
 .quick-action-content strong {
     display: block;
-    font-weight: 600;
-    color: white;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.quick-action-card.primary .quick-action-content strong {
+    color: var(--on-primary, #fff) !important;
 }
 
 .quick-action-content small {
-    color: rgba(226, 232, 240, 0.75);
+    color: var(--muted-text, #475569);
+}
+
+/* Improve contrast for primary quick-action (gradient) */
+.quick-action-card.primary .quick-action-content small {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* Make the icon readable on colored primary cards */
+.quick-action-card.primary .quick-action-icon {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+/* Ensure quick-action cards use clear surface background on light layout */
+.quick-actions-grid .quick-action-card {
+    background: var(--ui-surface);
+    color: var(--text-primary);
+}
+
+/* Utility to force higher contrast when needed */
+.quick-action-card.contrast-boost {
+    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 12px 36px rgba(15,23,42,0.08);
+}
+
+/* When contrast-boost is used on a primary card, keep gradient but boost text */
+.quick-action-card.primary.contrast-boost {
+    background: linear-gradient(135deg, #5b4df0, #3b82f6);
 }
 
 .progress {
@@ -815,4 +943,466 @@ audio {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* ===== Journal/Confessionário Styles ===== */
+.journal-form-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 20px 50px -30px rgba(79, 70, 229, 0.4);
+}
+
+.journal-entry-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.journal-entry-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2) !important;
+}
+
+.journal-audio-element {
+    border-radius: 10px;
+    background: white;
+    padding: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.journal-audio-element::-webkit-media-controls-panel {
+    background-color: white;
+}
+
+.journal-audio-element::-webkit-media-controls-play-button,
+.journal-audio-element::-webkit-media-controls-volume-slider {
+    filter: invert(0);
+}
+
+/* ===== Enhanced Audio Player ===== */
+.audio-shell {
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: var(--radius-md);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+}
+
+audio {
+    width: 100%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.3rem 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+audio::-webkit-media-controls-play-button {
+    background-color: var(--primary-500);
+    border-radius: 50%;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: var(--neutral-800);
+    font-weight: 600;
+}
+
+/* ===== Enhanced Cards ===== */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== Enhanced Buttons ===== */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Enhanced Form Controls ===== */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    transform: translateY(-1px);
+}
+
+/* ===== Enhanced Badges ===== */
+.badge {
+    transition: transform 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+/* ===== Page Headings Enhancement ===== */
+.page-heading {
+    background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.9));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 20px rgba(99, 102, 241, 0.3);
+}
+
+.page-subtitle {
+    color: rgba(226, 232, 240, 0.8);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* ===== Enhanced History Cards ===== */
+.history-card {
+    transition: all 0.3s ease;
+}
+
+.history-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 45px rgba(99, 102, 241, 0.2) !important;
+}
+
+.history-card .card-body {
+    position: relative;
+}
+
+.history-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.history-card:hover::before {
+    opacity: 1;
+}
+
+/* ===== Enhanced Dashboard Cards ===== */
+.feature-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.feature-card:hover::after {
+    opacity: 1;
+}
+
+/* ===== Enhanced Navigation ===== */
+.navbar .nav-link {
+    position: relative;
+}
+
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-brand);
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.navbar .nav-link:hover::after {
+    width: 60%;
+}
+
+/* ===== Loading States ===== */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* ===== Enhanced Alerts ===== */
+.alert {
+    border-left: 4px solid;
+    animation: slideInRight 0.3s ease;
+}
+
+.alert-success {
+    border-left-color: var(--success-500);
+}
+
+.alert-info {
+    border-left-color: var(--info-500);
+}
+
+.alert-warning {
+    border-left-color: var(--warning-500);
+}
+
+.alert-danger {
+    border-left-color: var(--danger-500);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== Enhanced Empty States ===== */
+.empty-state-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* ===== Enhanced Audio Players ===== */
+.audio-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.audio-icon-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.history-audio-player,
+.analyze-audio-player {
+    border-radius: 12px;
+    background: white;
+    padding: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.audio-player-enhanced {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(56, 189, 248, 0.05));
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.audio-shell {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(56, 189, 248, 0.08));
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+/* ===== Enhanced Emotion Badges ===== */
+.emotion-analysis-section {
+    margin-top: 1rem;
+}
+
+.emotion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+}
+
+.emotion-badge:hover {
+    transform: scale(1.05);
+}
+
+/* ===== Enhanced History Cards ===== */
+.history-card .card-body {
+    position: relative;
+}
+
+.history-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.history-card:hover::before {
+    opacity: 1;
+}
+
+/* ===== Responsive Enhancements ===== */
+@media (max-width: 768px) {
+    .journal-form-card {
+        margin-bottom: 2rem;
+    }
+    
+    .page-heading {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .audio-icon-large {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .history-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Contrast fixes (ensure readable text on light background) ===== */
+.hero-section { color: var(--text-primary) !important; }
+.hero-title { color: var(--text-primary) !important; }
+.hero-paragraph { color: var(--muted-text) !important; }
+.page-heading { color: var(--text-primary) !important; background: none !important; -webkit-background-clip: unset !important; -webkit-text-fill-color: unset !important; text-shadow: none !important; }
+.page-subtitle { color: var(--muted-text) !important; }
+.quick-actions-section .card { color: var(--text-primary) !important; }
+.quick-action-card.primary .quick-action-content strong { color: white !important; }
+
+/* make small helper text readable */
+.quick-action-content small, .plan-resource p, .page-subtitle, .page-subtitle { color: var(--muted-text) !important; }
+
+/* navigation contrast */
+.navbar .nav-link, .navbar .navbar-brand { color: var(--text-primary) !important; }
+
+/* ensure timeline and list text is clearly readable */
+.timeline-item, .timeline-item * { color: var(--text-primary) !important; }
+
+/* end contrast fixes */
+
+/* ===== WCAG palette & utilities (appended) ===== */
+/* Extended accessible tokens */
+:root {
+    --wcag-primary: #3743c8; /* strong indigo */
+    --wcag-primary-contrast: #ffffff;
+    --wcag-accent: #0f172a; /* readable text */
+    --wcag-muted: #475569;
+}
+
+/* Accessible helpers */
+.wcag-on-primary { color: var(--wcag-primary-contrast) !important; }
+.wcag-text { color: var(--wcag-accent) !important; }
+.wcag-muted { color: var(--wcag-muted) !important; }
+
+/* Force important contrast where browser styles may interfere */
+.quick-actions-section, .quick-actions-section * { color: var(--wcag-accent) !important; }
+.timeline-item, .timeline-item * { color: var(--wcag-accent) !important; }
+.page-heading, .page-heading * { color: var(--wcag-accent) !important; }
+.page-subtitle, .page-subtitle * { color: var(--wcag-muted) !important; }
+.navbar .nav-link, .navbar .navbar-brand { color: var(--wcag-accent) !important; }
+
+/* Ensure text-on-primary elements use white for contrast */
+.bg-primary, .btn-primary, .quick-action-card.primary { color: var(--wcag-primary-contrast) !important; }
+
+/* Slight lifts for small text that previously felt washed-out */
+.quick-action-content small, .plan-resource p, .page-subtitle { color: var(--wcag-muted) !important; font-weight: 600; }
+
+/* End WCAG palette utilities */
+
+/* Final contrast tuning */
+:root {
+    --final-muted: #4b5563; /* stronger muted */
+}
+
+/* Ensure main headings and hero are clearly visible */
+.hero-title, .page-heading { color: var(--text-primary) !important; }
+.hero-paragraph, .page-subtitle, .quick-action-content small { color: var(--final-muted) !important; }
+
+/* Make quick action cards pop on light surfaces */
+.quick-action-card { background: #ffffff; border: 1px solid rgba(15,23,42,0.04); }
+.quick-action-card .quick-action-icon { background: rgba(15,23,42,0.04); color: var(--primary-600); }
+.quick-action-card.primary .quick-action-icon { background: rgba(255,255,255,0.12); color: var(--on-primary); }
+.quick-action-card:focus, .quick-action-card:focus-visible { outline: 3px solid rgba(99,102,241,0.14); outline-offset: 4px; }
+
+/* Stronger small text for readability inside quick action cards */
+.quick-action-content small { color: var(--final-muted) !important; font-weight: 600; }
+
+/* Primary quick-action: ensure icon is readable */
+.quick-action-card.primary .quick-action-icon { color: var(--on-primary) !important; background: rgba(255,255,255,0.06); }
+
+/* Slightly darker navbar shadow and clearer text */
+.navbar { box-shadow: 0 10px 40px rgba(16,24,40,0.08); }
+.navbar .nav-link:hover { background: rgba(15,23,42,0.04); }
+
+/* Ensure badges inside cards are readable */
+.card .badge { color: var(--primary-700); background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.08); }
+
+/* Timeline / list items: stronger contrast */
+.timeline-item { background: #ffffff; border: 1px solid rgba(15,23,42,0.06); color: var(--text-primary); }
+.timeline-item p, .timeline-item .small, .timeline-item small { color: var(--final-muted); }
+
+/* Badges and achievements: increase contrast */
+.badge { color: var(--neutral-900); background: rgba(250,250,251,0.9); border: 1px solid rgba(15,23,42,0.04); }
+.achievement-badge { background: rgba(255, 193, 7, 0.14); color: #7a4300; border: 1px solid rgba(180,120,10,0.18); }
+
+/* Utility class to force high contrast when needed */
+.contrast-boost { color: var(--text-primary) !important; background: #ffffff !important; }
+
+/* Reduce overlay opacity from body background so foreground contrasts more */
+body.app-body::after { opacity: 0.5; }
+
 

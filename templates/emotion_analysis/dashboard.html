@@ -93,7 +93,7 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             {% for a in user_achievements %}
-            <span class="badge" style="background:rgba(255,193,7,.15);color:#ffc107;padding:6px 10px;">🏆 {{ a.get_achievement_type_display }}</span>
+            <span class="badge achievement-badge">🏆 {{ a.get_achievement_type_display }}</span>
             {% endfor %}
         </div>
     </div>

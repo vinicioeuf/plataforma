@@ -33,10 +33,25 @@
                             </small>
                             
                             <div class="mt-3">
-                                <audio controls class="w-100">
-                                    <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
-                                    Seu navegador não suporta o elemento de áudio.
-                                </audio>
+                                <div class="audio-player-enhanced">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="audio-icon-large">
+                                            <i class="bi bi-mic-fill"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">Gravação de Áudio</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> {{ recording.created_at|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <audio controls class="w-100 analyze-audio-player">
+                                        <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
+                                        <source src="{{ recording.audio_file.url }}" type="audio/wav">
+                                        <source src="{{ recording.audio_file.url }}" type="audio/ogg">
+                                        Seu navegador não suporta o elemento de áudio.
+                                    </audio>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -10,34 +10,48 @@
 
     <div class="row align-items-center g-5">
         <div class="col-lg-6">
-            <div class="hero-badge">
-                <i class="bi bi-stars"></i>
-                Sua jornada de autocuidado começa aqui
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="hero-badge">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    Plataforma de bem-estar digital
+                </span>
+                <span class="badge" style="background:linear-gradient(90deg,#f472b6,#8b5cf6);color:white;">Reconhecimento de emoção por voz • Beta</span>
             </div>
+
             <h1 class="hero-title mt-4">
-                Transforme suas emoções em autoconhecimento com tecnologia de voz
+                Uma plataforma completa de saúde emocional — ferramentas, apoio e insights
             </h1>
+
             <p class="hero-paragraph">
-                A EmotionAI combina inteligência artificial e bem-estar emocional para reconhecer sentimentos a 
-                partir da sua voz, criando um panorama claro do seu estado emocional a cada desabafo.
+                A EmotionAI oferece diário privado, jogos terapêuticos, agendamento de consultas e comunidades de apoio.
+                Como diferencial, disponibilizamos o reconhecimento de emoções a partir da sua voz (serviço em Beta),
+                que gera insights rápidos e fáceis de interpretar após cada desabafo.
             </p>
+
             <div class="hero-cta">
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-speedometer2"></i> Acessar painel
+                        <i class="bi bi-grid"></i> Conhecer serviços
                     </a>
                     <a href="{% url 'record_audio' %}" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-mic"></i> Nova análise
+                        <i class="bi bi-mic"></i> Experimente o reconhecimento (Beta)
                     </a>
                 {% else %}
                     <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
                         <i class="bi bi-person-plus"></i> Criar conta gratuita
                     </a>
                     <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-box-arrow-in-right"></i> Já tenho conta
+                        <i class="bi bi-box-arrow-in-right"></i> Entrar
                     </a>
                 {% endif %}
             </div>
+
+            <ul class="list-unstyled mt-4 text-muted small">
+                <li>• Diário privado e reflexão pessoal</li>
+                <li>• Jogos terapêuticos e exercícios de regulação</li>
+                <li>• Agendamento e acompanhamento com profissionais</li>
+                <li>• Comunidades e grupos de apoio</li>
+            </ul>
 
             <div class="stats-bubble mt-5">
                 <div class="stat-item">
@@ -60,29 +74,46 @@
                     <div class="feature-icon">
                         <i class="bi bi-activity"></i>
                     </div>
-                    <h3 class="fw-bold mb-2">Como funciona</h3>
-                    <p class="text-muted mb-4">
-                        O ciclo completo da análise de emoções, da captura da voz ao insight final.
-                    </p>
+                    <h3 class="fw-bold mb-2">Nossos serviços</h3>
+                    <p class="text-muted mb-4">Um conjunto integrado de ferramentas para apoiar sua saúde emocional — escolha o que faz sentido para você.</p>
+
                     <div class="workflow-step">
                         <div class="workflow-index">1</div>
                         <div class="workflow-content">
-                            <h5>Grave ou envie seu áudio</h5>
-                            <p class="text-muted mb-0">Compatível com formatos populares e desabafo direto do navegador.</p>
+                            <h5>Diário Privado & Desabafo</h5>
+                            <p class="text-muted mb-0">Registre textos e áudios num espaço privado para reflexão e acompanhamento.</p>
                         </div>
                     </div>
+
                     <div class="workflow-step">
                         <div class="workflow-index">2</div>
                         <div class="workflow-content">
-                            <h5>Analise instantaneamente</h5>
-                            <p class="text-muted mb-0">Integre seu modelo de IA e obtenha emoções dominantes e secundárias.</p>
+                            <h5>Jogos Terapêuticos</h5>
+                            <p class="text-muted mb-0">Exercícios interativos para treinar regulação emocional e habilidades práticas.</p>
                         </div>
                     </div>
-                    <div class="workflow-step mb-0">
+
+                    <div class="workflow-step">
                         <div class="workflow-index">3</div>
                         <div class="workflow-content">
-                            <h5>Acompanhe sua evolução</h5>
-                            <p class="text-muted mb-0">Visualize padrões emocionais e histórico completo em poucos cliques.</p>
+                            <h5>Consultas e Acompanhamento</h5>
+                            <p class="text-muted mb-0">Agende profissionais e acompanhe progresso com relatórios consolidados.</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mb-0">
+                        <div class="workflow-index">4</div>
+                        <div class="workflow-content">
+                            <h5>Comunidades de Apoio</h5>
+                            <p class="text-muted mb-0">Participe de grupos temáticos e espaços de acolhimento moderados.</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step mt-3 mb-0">
+                        <div class="workflow-index">★</div>
+                        <div class="workflow-content">
+                            <h5>Reconhecimento de Emoções por Voz <small class="text-muted">(Beta)</small></h5>
+                            <p class="text-muted mb-0">Um recurso adicional para obter insights rápidos a partir de áudios — opcional e em evolução.</p>
                         </div>
                     </div>
                 </div>
@@ -100,39 +131,57 @@
     <div class="row g-4">
         <div class="col-md-6 col-xl-4">
             <div class="feature-card h-100">
-                <div class="feature-icon"><i class="bi bi-mic"></i></div>
-                <h4 class="fw-semibold">Desabafo fluido</h4>
-                <p class="text-muted">Grave diretamente do navegador com feedback em tempo real e pré-visualização instantânea.</p>
+                <div class="feature-icon"><i class="bi bi-journal-text"></i></div>
+                <h4 class="fw-semibold">Diário & Confessionário</h4>
+                <p class="text-muted">Registre suas reflexões em texto ou áudio e mantenha um histórico privado de progresso emocional.</p>
                 <ul class="list-unstyled text-muted small mb-0">
-                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Suporte a áudio multiformato</li>
-                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Upload arrastar-e-soltar</li>
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Entradas privadas e seguras</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Exporte e acompanhe seus padrões</li>
                 </ul>
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="feature-card h-100">
-                <div class="feature-icon"><i class="bi bi-bar-chart"></i></div>
-                <h4 class="fw-semibold">Insights acionáveis</h4>
-                <p class="text-muted">Visualize gráficos dinâmicos, emoções dominantes e distribuição detalhada em segundos.</p>
+                <div class="feature-icon"><i class="bi bi-joystick"></i></div>
+                <h4 class="fw-semibold">Jogos Terapêuticos</h4>
+                <p class="text-muted">Atividades guiadas para treinar regulação emocional, memória afetiva e atenção plena.</p>
                 <ul class="list-unstyled text-muted small mb-0">
-                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Dados prontos para dashboards</li>
-                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Histórico sempre acessível</li>
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Exercícios interativos</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Feedback imediato</li>
                 </ul>
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="feature-card h-100">
-                <div class="feature-icon"><i class="bi bi-lock"></i></div>
-                <h4 class="fw-semibold">Segurança em primeiro lugar</h4>
-                <p class="text-muted">Permissões por usuário, armazenamento isolado e proteção CSRF nativos do Django.</p>
+                <div class="feature-icon"><i class="bi bi-people-fill"></i></div>
+                <h4 class="fw-semibold">Consultas e Comunidades</h4>
+                <p class="text-muted">Agende sessões com profissionais e conecte-se a grupos de apoio para compartilhar experiências.</p>
                 <ul class="list-unstyled text-muted small mb-0">
-                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Gerenciamento de contas seguro</li>
-                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Arquivos sob seu controle</li>
+                    <li class="mb-2"><i class="bi bi-check-circle me-1 text-primary"></i>Agendamento integrado</li>
+                    <li><i class="bi bi-check-circle me-1 text-primary"></i>Grupos temáticos moderados</li>
                 </ul>
             </div>
         </div>
     </div>
 </section>
+
+{% comment %} Landing extras for unauthenticated users: testimonials & CTA banner {% endcomment %}
+{% if not user.is_authenticated %}
+<section class="container mt-5">
+    <div class="card p-4" style="background: linear-gradient(90deg, rgba(79,70,229,0.08), rgba(56,189,248,0.04));">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold mb-2">Comece seu acompanhamento emocional hoje</h3>
+                <p class="mb-0 text-muted">Registre desabafos, acompanhe padrões e receba insights — tudo com privacidade e segurança.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Criar conta gratuita</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Entrar</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <section class="container secondary-section">
     <div class="section-heading">
@@ -196,12 +245,13 @@
 <section class="container secondary-section pb-5">
     <div class="card p-4 p-lg-5">
         <div class="card-body text-center">
-            <h2 class="fw-bold mb-3">Pronto para desbloquear seus insights emocionais?</h2>
-            <p class="text-muted mb-4">Crie sua conta ou faça login para começar a registrar momentos importantes e acompanhar sua evolução emocional.</p>
+            <h2 class="fw-bold mb-3">Pronto para experimentar todos os nossos serviços?</h2>
+            <p class="text-muted mb-4">Crie sua conta ou faça login para acessar diário, jogos, consultas e os recursos de análise — incluindo o reconhecimento por voz em Beta.</p>
             {% if user.is_authenticated %}
-                <a href="{% url 'record_audio' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-mic"></i> Registrar nova emoção
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-grid"></i> Conhecer meu painel
                 </a>
+                <a href="{% url 'consultations' %}" class="btn btn-outline-primary btn-lg ms-2">Agendar consulta</a>
             {% else %}
                 <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">
                     <i class="bi bi-person-plus"></i> Criar minha conta

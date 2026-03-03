@@ -49,24 +49,40 @@
                         {% endif %}
 
                         <div class="audio-shell mb-3">
-                            <audio controls class="w-100">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="audio-icon-wrapper">
+                                    <i class="bi bi-mic-fill"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted fw-semibold d-block">Gravação de Áudio</small>
+                                    <small class="text-muted">{{ recording.created_at|date:"d/m/Y H:i" }}</small>
+                                </div>
+                            </div>
+                            <audio controls class="w-100 history-audio-player">
                                 <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
+                                <source src="{{ recording.audio_file.url }}" type="audio/wav">
+                                <source src="{{ recording.audio_file.url }}" type="audio/ogg">
                                 Seu navegador não suporta áudio.
                             </audio>
                         </div>
 
-                        <div>
+                        <div class="emotion-analysis-section">
                             {% if recording.emotion_analysis %}
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="emotion-badge emotion-{{ recording.emotion_analysis.dominant_emotion }}">
-                                        {{ recording.emotion_analysis.get_emotion_display_name }}
-                                    </span>
-                                    <small class="text-muted fw-semibold">
-                                        {{ recording.emotion_analysis.get_confidence_percentage }}%
-                                    </small>
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(56, 189, 248, 0.05)); border: 1px solid rgba(99, 102, 241, 0.2);">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="emotion-badge emotion-{{ recording.emotion_analysis.dominant_emotion }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                            <i class="bi bi-emoji-smile"></i> {{ recording.emotion_analysis.get_emotion_display_name }}
+                                        </span>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Confiança</small>
+                                        <strong class="text-primary" style="font-size: 1.1rem;">{{ recording.emotion_analysis.get_confidence_percentage }}%</strong>
+                                    </div>
                                 </div>
                             {% else %}
-                                <span class="badge bg-secondary">Aguardando análise</span>
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bi bi-hourglass-split"></i> Aguardando análise
+                                </div>
                             {% endif %}
                         </div>
                     </div>

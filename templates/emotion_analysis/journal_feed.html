@@ -1,154 +1,792 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Confessionário - EmotionAI{% endblock %}
 {% block content %}
 <div class="container pb-5">
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="page-heading"><i class="bi bi-journal-text"></i> Confessionário Virtual</h1>
-            <p class="text-muted">Um espaço seguro para desabafar e se conectar.</p>
+            <h1 class="page-heading">
+                <i class="bi bi-journal-heart"></i> Confessionário Virtual
+            </h1>
+            <p class="page-subtitle">Um espaço seguro e acolhedor para desabafar, compartilhar sentimentos e se conectar com outros.</p>
         </div>
     </div>
+    
     <div class="row">
-        <!-- New Entry Form -->
+        <!-- Formulário de Nova Entrada -->
         <div class="col-lg-4 mb-4">
-            <div class="card p-4 sticky-top" style="top:90px;">
-                <h5 class="fw-bold mb-3"><i class="bi bi-pen"></i> Novo Desabafo</h5>
-                <div class="mb-3">
-                    <textarea id="entryContent" class="form-control" rows="5" placeholder="O que está no seu coração?..." maxlength="2000" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;resize:none;"></textarea>
-                    <small class="text-muted" id="charCount">0/2000</small>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small">Como você se sente? (1-5)</label>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button class="btn btn-outline-light mood-btn" data-mood="1">😢</button>
-                        <button class="btn btn-outline-light mood-btn" data-mood="2">😔</button>
-                        <button class="btn btn-outline-light mood-btn" data-mood="3">😐</button>
-                        <button class="btn btn-outline-light mood-btn" data-mood="4">😊</button>
-                        <button class="btn btn-outline-light mood-btn" data-mood="5">😄</button>
+            <div class="card journal-form-card sticky-top" style="top:90px;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <div class="journal-form-icon">
+                            <i class="bi bi-pen"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Novo Desabafo</h5>
+                    </div>
+                    
+                    <!-- Tabs para Texto/Áudio -->
+                    <ul class="nav nav-pills mb-3 journal-tabs" id="entryTypeTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="text-tab" data-bs-toggle="pill" data-bs-target="#text-form" type="button" role="tab">
+                                <i class="bi bi-type"></i> Texto
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="audio-tab" data-bs-toggle="pill" data-bs-target="#audio-form" type="button" role="tab">
+                                <i class="bi bi-mic"></i> Áudio
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="entryTypeTabContent">
+                        <!-- Formulário de Texto -->
+                        <div class="tab-pane fade show active" id="text-form" role="tabpanel">
+                            <div class="mb-3">
+                                <textarea id="entryContent" class="form-control journal-textarea" rows="6" 
+                                    placeholder="O que está no seu coração hoje? Compartilhe seus pensamentos..." 
+                                    maxlength="2000"></textarea>
+                                <small class="text-muted d-flex justify-content-between mt-1">
+                                    <span id="charCount">0/2000 caracteres</span>
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">
+                                    <i class="bi bi-emoji-smile"></i> Como você se sente?
+                                </label>
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <button class="btn mood-btn" data-mood="1" title="Muito triste">
+                                        <span class="mood-emoji">😢</span>
+                                    </button>
+                                    <button class="btn mood-btn" data-mood="2" title="Triste">
+                                        <span class="mood-emoji">😔</span>
+                                    </button>
+                                    <button class="btn mood-btn active" data-mood="3" title="Neutro">
+                                        <span class="mood-emoji">😐</span>
+                                    </button>
+                                    <button class="btn mood-btn" data-mood="4" title="Feliz">
+                                        <span class="mood-emoji">😊</span>
+                                    </button>
+                                    <button class="btn mood-btn" data-mood="5" title="Muito feliz">
+                                        <span class="mood-emoji">😄</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">
+                                    <i class="bi bi-eye"></i> Visibilidade
+                                </label>
+                                <select id="visibility" class="form-select journal-select">
+                                    <option value="private">🔒 Privado (só você)</option>
+                                    <option value="friends">👥 Amigos</option>
+                                    <option value="public">🌐 Público</option>
+                                    <option value="anonymous">🎭 Anônimo (público, sem nome)</option>
+                                </select>
+                            </div>
+                            
+                            <button id="submitBtn" class="btn btn-primary w-100 journal-submit-btn" onclick="submitEntry()">
+                                <i class="bi bi-send"></i> Publicar Desabafo
+                            </button>
+                        </div>
+                        
+                        <!-- Formulário de Áudio -->
+                        <div class="tab-pane fade" id="audio-form" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">
+                                    <i class="bi bi-chat-text"></i> Descrição (opcional)
+                                </label>
+                                <textarea id="audioContent" class="form-control journal-textarea" rows="3" 
+                                    placeholder="Adicione uma descrição ao seu áudio..." maxlength="500"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">
+                                    <i class="bi bi-emoji-smile"></i> Como você se sente?
+                                </label>
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <button class="btn mood-btn-audio" data-mood="1">😢</button>
+                                    <button class="btn mood-btn-audio" data-mood="2">😔</button>
+                                    <button class="btn mood-btn-audio active" data-mood="3">😐</button>
+                                    <button class="btn mood-btn-audio" data-mood="4">😊</button>
+                                    <button class="btn mood-btn-audio" data-mood="5">😄</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">
+                                    <i class="bi bi-eye"></i> Visibilidade
+                                </label>
+                                <select id="audioVisibility" class="form-select journal-select">
+                                    <option value="private">🔒 Privado (só você)</option>
+                                    <option value="friends">👥 Amigos</option>
+                                    <option value="public">🌐 Público</option>
+                                    <option value="anonymous">🎭 Anônimo (público, sem nome)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Área de Gravação -->
+                            <div class="audio-recording-area mb-3">
+                                <div id="recordingStatus" class="alert alert-info mb-3 d-none">
+                                    <i class="bi bi-info-circle"></i> 
+                                    <span id="recordingStatusText">Pronto para gravar</span>
+                                </div>
+                                
+                                <div class="text-center mb-3">
+                                    <button id="recordButton" class="btn btn-danger btn-lg record-btn">
+                                        <i class="bi bi-mic-fill"></i>
+                                        <span id="recordButtonText">Gravar Áudio</span>
+                                    </button>
+                                </div>
+                                
+                                <div id="audioPreview" class="d-none mb-3">
+                                    <div class="audio-preview-wrapper">
+                                        <audio id="audioPlayer" controls class="w-100 mb-2"></audio>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button id="restartButton" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-arrow-clockwise"></i> Regravar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <form id="audioForm" method="post" enctype="multipart/form-data" class="d-none">
+                                    {% csrf_token %}
+                                    <input type="file" id="recordedAudio" name="audio_file" accept="audio/*">
+                                    <input type="hidden" id="audioContentInput" name="content">
+                                    <input type="hidden" id="audioVisibilityInput" name="visibility">
+                                    <input type="hidden" id="audioMoodInput" name="mood_rating">
+                                </form>
+                            </div>
+                            
+                            <button id="submitAudioBtn" class="btn btn-primary w-100 journal-submit-btn d-none" onclick="submitAudioEntry()">
+                                <i class="bi bi-send"></i> Publicar Áudio
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="successMsg" class="alert alert-success mt-3 d-none small text-center">
+                        <i class="bi bi-check-circle"></i> Salvo com segurança! 💝
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label small">Visibilidade</label>
-                    <select id="visibility" class="form-select" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white;">
-                        <option value="private">🔒 Privado (só você)</option>
-                        <option value="friends">👥 Amigos</option>
-                        <option value="public">🌐 Público</option>
-                        <option value="anonymous">🎭 Anônimo (público, sem nome)</option>
-                    </select>
-                </div>
-                <button id="submitBtn" class="btn btn-primary w-100" onclick="submitEntry()">
-                    <i class="bi bi-send"></i> Publicar
-                </button>
-                <div id="successMsg" class="alert alert-success mt-2 d-none small text-center">Salvo com segurança! 💝</div>
             </div>
         </div>
         
-        <!-- Feed -->
+        <!-- Feed de Entradas -->
         <div class="col-lg-8">
             {% for entry in entries %}
-            <div class="card p-4 mb-3 journal-entry" style="animation:fadeInUp .4s ease {{ forloop.counter0|add:'0' }}s both;">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        {% if entry.visibility == 'anonymous' %}
-                        <div class="avatar-sm">🎭</div>
-                        <div>
-                            <strong>Anônimo</strong>
-                            <small class="text-muted d-block">{{ entry.created_at|timesince }} atrás</small>
+            <div class="card journal-entry-card mb-4 journal-entry-animated" data-entry-index="{{ forloop.counter0 }}">
+                <div class="card-body p-4">
+                    <!-- Cabeçalho da Entrada -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if entry.visibility == 'anonymous' %}
+                            <div class="journal-avatar journal-avatar-anonymous">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="journal-author">Anônimo</strong>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-clock"></i> {{ entry.created_at|timesince }} atrás
+                                </small>
+                            </div>
+                            {% else %}
+                            <div class="journal-avatar" style="background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));">
+                                {{ entry.user.username|first|upper }}
+                            </div>
+                            <div>
+                                <strong class="journal-author">
+                                    {% if entry.user == request.user %}Você{% else %}{{ entry.user.get_full_name|default:entry.user.username }}{% endif %}
+                                </strong>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-clock"></i> {{ entry.created_at|timesince }} atrás
+                                </small>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="avatar-sm">{{ entry.user.username|first|upper }}</div>
-                        <div>
-                            <strong>{% if entry.user == request.user %}Você{% else %}{{ entry.user.get_full_name|default:entry.user.username }}{% endif %}</strong>
-                            <small class="text-muted d-block">{{ entry.created_at|timesince }} atrás</small>
+                        
+                        <div class="d-flex align-items-center gap-2">
+                            {% if entry.mood_rating %}
+                            <span class="journal-mood-badge">
+                                {% if entry.mood_rating == 1 %}😢{% elif entry.mood_rating == 2 %}😔{% elif entry.mood_rating == 3 %}😐{% elif entry.mood_rating == 4 %}😊{% else %}😄{% endif %}
+                            </span>
+                            {% endif %}
+                            
+                            <span class="journal-visibility-badge">
+                                {% if entry.visibility == 'private' %}
+                                    <i class="bi bi-lock-fill"></i> Privado
+                                {% elif entry.visibility == 'friends' %}
+                                    <i class="bi bi-people-fill"></i> Amigos
+                                {% elif entry.visibility == 'anonymous' %}
+                                    <i class="bi bi-mask"></i> Anônimo
+                                {% else %}
+                                    <i class="bi bi-globe"></i> Público
+                                {% endif %}
+                            </span>
                         </div>
-                        {% endif %}
                     </div>
-                    {% if entry.mood_rating %}
-                    <span class="badge" style="background:rgba(255,255,255,.1);">
-                        {% if entry.mood_rating == 1 %}😢{% elif entry.mood_rating == 2 %}😔{% elif entry.mood_rating == 3 %}😐{% elif entry.mood_rating == 4 %}😊{% else %}😄{% endif %}
-                    </span>
+                    
+                    <!-- Tipo de Entrada -->
+                    {% if entry.entry_type == 'audio' %}
+                    <div class="journal-entry-type-badge mb-3">
+                        <i class="bi bi-mic-fill"></i> Desabafo em Áudio
+                    </div>
                     {% endif %}
-                </div>
-                <p class="mb-2" style="white-space:pre-wrap;line-height:1.6;">{{ entry.content }}</p>
-                {% if entry.entry_type == 'audio' %}
-                <div class="badge bg-info mb-2"><i class="bi bi-mic"></i> Áudio</div>
-                {% endif %}
-                <div class="d-flex align-items-center gap-3 mt-2" style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-                    <button class="btn btn-sm {% if entry.id in user_likes %}btn-danger{% else %}btn-outline-danger{% endif %} like-btn" data-entry-id="{{ entry.id }}">
-                        <i class="bi bi-heart{% if entry.id in user_likes %}-fill{% endif %}"></i>
-                        <span class="like-count">{{ entry.likes_count }}</span>
-                    </button>
-                    <small class="text-muted">
-                        {% if entry.visibility == 'private' %}🔒 Privado
-                        {% elif entry.visibility == 'friends' %}👥 Amigos
-                        {% elif entry.visibility == 'anonymous' %}🎭 Anônimo
-                        {% else %}🌐 Público{% endif %}
-                    </small>
+                    
+                    <!-- Conteúdo -->
+                    {% if entry.content %}
+                    <div class="journal-content mb-3">
+                        <p class="mb-0" style="white-space:pre-wrap;line-height:1.8;color:var(--neutral-800);">
+                            {{ entry.content }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Player de Áudio -->
+                    {% if entry.audio_file %}
+                    <div class="journal-audio-player mb-3">
+                        <div class="audio-player-wrapper">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-mic-fill text-primary"></i>
+                                <small class="text-muted fw-semibold">Gravação de Áudio</small>
+                            </div>
+                            <audio controls class="w-100 journal-audio-element">
+                                <source src="{{ entry.audio_file.url }}" type="audio/mpeg">
+                                <source src="{{ entry.audio_file.url }}" type="audio/wav">
+                                <source src="{{ entry.audio_file.url }}" type="audio/ogg">
+                                Seu navegador não suporta o elemento de áudio.
+                            </audio>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Ações -->
+                    <div class="journal-actions d-flex align-items-center justify-content-between pt-3" style="border-top:1px solid rgba(0,0,0,.08);">
+                        <button class="btn btn-sm {% if entry.id in user_likes %}btn-danger{% else %}btn-outline-danger{% endif %} like-btn journal-like-btn" data-entry-id="{{ entry.id }}">
+                            <i class="bi bi-heart{% if entry.id in user_likes %}-fill{% endif %}"></i>
+                            <span class="like-count ms-1">{{ entry.likes_count }}</span>
+                        </button>
+                        
+                        <div class="d-flex align-items-center gap-3">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3"></i> {{ entry.created_at|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                    </div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-5">
-                <div style="font-size:4rem;">📝</div>
-                <h4 class="mt-3">Nenhum desabafo ainda</h4>
-                <p class="text-muted">Seja o primeiro a compartilhar algo!</p>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="empty-state-icon mb-3">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <h4 class="mb-3">Nenhum desabafo ainda</h4>
+                    <p class="text-muted mb-4">Seja o primeiro a compartilhar seus sentimentos e criar conexões!</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('text-tab').click()">
+                        <i class="bi bi-plus-circle"></i> Criar Primeiro Desabafo
+                    </button>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
 <style>
-.avatar-sm{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:.9rem;flex-shrink:0;}
-.mood-btn{min-width:44px;font-size:1.3rem;padding:4px 8px;transition:all .2s ease;}
-.mood-btn.active{background:var(--primary);border-color:var(--primary);transform:scale(1.15);}
-.journal-entry{transition:transform .2s ease;}
-.journal-entry:hover{transform:translateX(4px);}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+/* Estilos do Confessionário */
+.journal-form-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 20px 50px -30px rgba(79, 70, 229, 0.4);
+}
+
+.journal-form-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.journal-tabs .nav-link {
+    border: none;
+    color: var(--neutral-700);
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.journal-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    color: white;
+}
+
+.journal-textarea {
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(248, 250, 252, 0.8);
+    padding: 0.85rem 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.journal-textarea:focus {
+    border-color: var(--primary-500);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.journal-select {
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(248, 250, 252, 0.8);
+    padding: 0.6rem 1rem;
+}
+
+.mood-btn, .mood-btn-audio {
+    min-width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    background: rgba(248, 250, 252, 0.8);
+    font-size: 1.5rem;
+    padding: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mood-btn:hover, .mood-btn-audio:hover {
+    transform: translateY(-2px) scale(1.05);
+    border-color: var(--primary-500);
+}
+
+.mood-btn.active, .mood-btn-audio.active {
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    border-color: var(--primary-500);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.journal-submit-btn {
+    border-radius: 12px;
+    padding: 0.75rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.journal-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Área de Gravação */
+.audio-recording-area {
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px dashed rgba(99, 102, 241, 0.3);
+}
+
+.record-btn {
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.record-btn:hover {
+    transform: scale(1.05);
+}
+
+.record-btn.recording {
+    animation: pulse-record 1.5s infinite;
+}
+
+@keyframes pulse-record {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.audio-preview-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Cards de Entrada */
+.journal-entry-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.journal-entry-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.journal-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.journal-avatar-anonymous {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+
+.journal-author {
+    color: var(--neutral-900);
+    font-size: 1.1rem;
+}
+
+.journal-mood-badge {
+    font-size: 1.5rem;
+    padding: 0.3rem 0.6rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 10px;
+}
+
+.journal-visibility-badge {
+    padding: 0.4rem 0.8rem;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--neutral-700);
+    font-weight: 500;
+}
+
+.journal-entry-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+    border-radius: 10px;
+    color: var(--primary-500);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.journal-content {
+    color: var(--neutral-800);
+    line-height: 1.8;
+}
+
+.journal-audio-player {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(56, 189, 248, 0.05));
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.audio-player-wrapper {
+    position: relative;
+}
+
+.journal-audio-element {
+    border-radius: 10px;
+    background: white;
+    padding: 0.5rem;
+}
+
+.journal-like-btn {
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.journal-like-btn:hover {
+    transform: scale(1.05);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    color: rgba(148, 163, 184, 0.5);
+}
+
+.journal-entry-animated {
+    opacity: 0;
+    animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 991px) {
+    .journal-form-card {
+        position: relative !important;
+        top: 0 !important;
+    }
+}
 </style>
+
 <script>
-let selectedMood=3;
-document.querySelectorAll('.mood-btn').forEach(btn=>{
-    btn.addEventListener('click',function(){
-        document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-        this.classList.add('active');selectedMood=parseInt(this.dataset.mood);
+let selectedMood = 3;
+let selectedAudioMood = 3;
+let mediaRecorder;
+let audioChunks = [];
+let recordedBlob;
+
+// Inicializar botões de humor
+document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        selectedMood = parseInt(this.dataset.mood);
     });
 });
-document.getElementById('entryContent').addEventListener('input',function(){
-    document.getElementById('charCount').textContent=this.value.length+'/2000';
+
+document.querySelectorAll('.mood-btn-audio').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.mood-btn-audio').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        selectedAudioMood = parseInt(this.dataset.mood);
+    });
 });
 
-function submitEntry(){
-    const content=document.getElementById('entryContent').value.trim();
-    if(!content){alert('Escreva algo para publicar.');return;}
-    const visibility=document.getElementById('visibility').value;
-    document.getElementById('submitBtn').disabled=true;
+// Contador de caracteres
+document.getElementById('entryContent')?.addEventListener('input', function() {
+    const count = this.value.length;
+    document.getElementById('charCount').textContent = `${count}/2000 caracteres`;
+});
+
+// Função para submeter entrada de texto
+function submitEntry() {
+    const content = document.getElementById('entryContent').value.trim();
+    if (!content) {
+        alert('Escreva algo para publicar.');
+        return;
+    }
+    const visibility = document.getElementById('visibility').value;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Publicando...';
     
-    fetch('{% url "save_journal_entry" %}',{
-        method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
-        body:JSON.stringify({content:content,mood_rating:selectedMood,visibility:visibility,entry_type:'text'})
-    }).then(r=>r.json()).then(d=>{
-        document.getElementById('submitBtn').disabled=false;
-        if(d.success){
-            document.getElementById('entryContent').value='';
-            document.getElementById('charCount').textContent='0/2000';
-            const msg=document.getElementById('successMsg');
+    fetch('{% url "save_journal_entry" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            content: content,
+            mood_rating: selectedMood,
+            visibility: visibility,
+            entry_type: 'text'
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send"></i> Publicar Desabafo';
+        if (d.success) {
+            document.getElementById('entryContent').value = '';
+            document.getElementById('charCount').textContent = '0/2000 caracteres';
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.mood-btn[data-mood="3"]').classList.add('active');
+            selectedMood = 3;
+            const msg = document.getElementById('successMsg');
             msg.classList.remove('d-none');
-            setTimeout(()=>msg.classList.add('d-none'),3000);
-            setTimeout(()=>location.reload(),1000);
-        } else alert(d.error||'Erro ao salvar');
+            setTimeout(() => msg.classList.add('d-none'), 3000);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            alert(d.error || 'Erro ao salvar');
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send"></i> Publicar Desabafo';
+        alert('Erro ao conectar com o servidor');
     });
 }
 
-document.querySelectorAll('.like-btn').forEach(btn=>{
-    btn.addEventListener('click',function(){
-        const eid=this.dataset.entryId;
-        fetch(`/journal/like/${eid}/`,{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})
-        .then(r=>r.json()).then(d=>{
-            if(d.success){
-                this.querySelector('.like-count').textContent=d.likes_count;
-                const icon=this.querySelector('i');
-                if(d.liked){this.className='btn btn-sm btn-danger like-btn';icon.className='bi bi-heart-fill';}
-                else{this.className='btn btn-sm btn-outline-danger like-btn';icon.className='bi bi-heart';}
-                this.dataset.entryId=eid;
+// Sistema de Gravação de Áudio
+const recordButton = document.getElementById('recordButton');
+const audioPreview = document.getElementById('audioPreview');
+const audioPlayer = document.getElementById('audioPlayer');
+const restartButton = document.getElementById('restartButton');
+const recordingStatus = document.getElementById('recordingStatus');
+const recordedAudioInput = document.getElementById('recordedAudio');
+const submitAudioBtn = document.getElementById('submitAudioBtn');
+
+if (recordButton) {
+    recordButton.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+            // Iniciar gravação
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(recordedBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPreview.classList.remove('d-none');
+                    submitAudioBtn.classList.remove('d-none');
+                    recordingStatus.classList.add('d-none');
+                    
+                    // Converter blob para file
+                    const file = new File([recordedBlob], 'recording.webm', { type: 'audio/webm' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    recordedAudioInput.files = dataTransfer.files;
+                };
+                
+                mediaRecorder.start();
+                audioChunks = [];
+                recordButton.innerHTML = '<i class="bi bi-stop-circle-fill"></i> <span id="recordButtonText">Parar Gravação</span>';
+                recordButton.classList.add('recording');
+                recordButton.classList.remove('btn-danger');
+                recordButton.classList.add('btn-warning');
+                recordingStatus.classList.remove('d-none');
+                recordingStatus.className = 'alert alert-warning mb-3';
+                document.getElementById('recordingStatusText').textContent = 'Gravando... Clique novamente para parar.';
+            } catch (error) {
+                alert('Erro ao acessar o microfone. Verifique as permissões.');
+                console.error(error);
+            }
+        } else {
+            // Parar gravação
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            recordButton.innerHTML = '<i class="bi bi-mic-fill"></i> <span id="recordButtonText">Gravar Novamente</span>';
+            recordButton.classList.remove('recording', 'btn-warning');
+            recordButton.classList.add('btn-danger');
+            recordingStatus.classList.add('d-none');
+        }
+    });
+}
+
+if (restartButton) {
+    restartButton.addEventListener('click', () => {
+        audioPreview.classList.add('d-none');
+        submitAudioBtn.classList.add('d-none');
+        audioPlayer.src = '';
+        audioChunks = [];
+        mediaRecorder = null;
+        recordButton.innerHTML = '<i class="bi bi-mic-fill"></i> <span id="recordButtonText">Gravar Áudio</span>';
+    });
+}
+
+// Função para submeter entrada de áudio
+function submitAudioEntry() {
+    const content = document.getElementById('audioContent').value.trim() || 'Desabafo por áudio';
+    const visibility = document.getElementById('audioVisibility').value;
+    
+    if (!recordedBlob) {
+        alert('Por favor, grave um áudio primeiro.');
+        return;
+    }
+    
+    const btn = document.getElementById('submitAudioBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Publicando...';
+    
+    // Preparar dados do formulário
+    document.getElementById('audioContentInput').value = content;
+    document.getElementById('audioVisibilityInput').value = visibility;
+    document.getElementById('audioMoodInput').value = selectedAudioMood;
+    
+    const formData = new FormData(document.getElementById('audioForm'));
+    
+    fetch('{% url "save_journal_audio" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: formData
+    })
+    .then(r => {
+        if (r.ok) {
+            return r;
+        }
+        throw new Error('Erro ao salvar');
+    })
+    .then(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send"></i> Publicar Áudio';
+        const msg = document.getElementById('successMsg');
+        msg.classList.remove('d-none');
+        setTimeout(() => {
+            msg.classList.add('d-none');
+            location.reload();
+        }, 1000);
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send"></i> Publicar Áudio';
+        alert('Erro ao salvar áudio. Tente novamente.');
+        console.error(err);
+    });
+}
+
+// Aplicar delay de animação às entradas
+document.querySelectorAll('.journal-entry-animated').forEach((entry, index) => {
+    entry.style.animationDelay = `${index * 0.1}s`;
+});
+
+// Sistema de Curtidas
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const eid = this.dataset.entryId;
+        const icon = this.querySelector('i');
+        const countSpan = this.querySelector('.like-count');
+        
+        fetch(`/journal/like/${eid}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                countSpan.textContent = d.likes_count;
+                if (d.liked) {
+                    this.className = 'btn btn-sm btn-danger like-btn journal-like-btn';
+                    icon.className = 'bi bi-heart-fill';
+                } else {
+                    this.className = 'btn btn-sm btn-outline-danger like-btn journal-like-btn';
+                    icon.className = 'bi bi-heart';
+                }
+                this.dataset.entryId = eid;
             }
         });
     });
